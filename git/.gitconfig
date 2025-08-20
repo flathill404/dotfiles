@@ -1,0 +1,7 @@
+[user]
+    name = flathill404
+    email = 38638577+flathill404@users.noreply.github.com
+[include]
+    path = ~/.gitconfig.local
+[init]
+    defaultBranch = main
