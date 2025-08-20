@@ -16,5 +16,17 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
+# python tools aliases
+if type "pygmentize" > /dev/null 2>&1; then
+    alias ccat='pygmentize -g'
+fi
+
+# apt aliases
+if type "apt" > /dev/null 2>&1; then
+    alias aptsync='sudo apt update && sudo apt upgrade -y'
+fi
+
 # xmodmap aliases
-alias xmm='xmodmap ~/.Xmodmap'
+if type "xmodmap" > /dev/null 2>&1; then
+    alias xmm='xmodmap ~/.Xmodmap'
+fi
