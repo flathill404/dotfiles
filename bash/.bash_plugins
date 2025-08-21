@@ -1,0 +1,126 @@
+# shellcheck shell=bash
+
+function _command_exists() {
+	type -t "${1?}" > /dev/null
+}
+
+function ips() {
+	if _command_exists ifconfig; then
+		ifconfig | awk '/inet /{ gsub(/addr:/, ""); print $2 }'
+	elif _command_exists ip; then
+		ip addr | grep -oP 'inet \K[\d.]+'
+	else
+		echo "You don't have ifconfig or ip command installed!"
+	fi
+}
+
+function myip() {
+	list=("http://myip.dnsomatic.com/" "http://checkip.dyndns.com/" "http://checkip.dyndns.org/")
+	for url in "${list[@]}"; do
+		if res="$(curl -fs "${url}")"; then
+			break
+		fi
+	done
+	res="$(echo "$res" | grep -Eo '[0-9\.]+')"
+	echo -e "Your public IP is: ${echo_bold_green-} $res ${echo_normal-}"
+}
+
+function pickfrom() {
+	local file=${1:-}
+	local -i n=0 length
+	if [[ ! -r "$file" ]]; then
+		reference "${FUNCNAME[0]}" && return
+	fi
+	length="$(wc -l < "$file")"
+	n=$((RANDOM * length / 32768 + 1))
+	head -n "$n" "$file" | tail -1
+}
+
+function passgen() {
+	local -i i length=${1:-4}
+	local pass
+	# shellcheck disable=SC2034
+	pass="$(for i in $(eval "echo {1..$length}"); do pickfrom /usr/share/dict/words; done)"
+	echo "With spaces (easier to memorize): ${pass//$'\n'/ }"
+	echo "Without spaces (easier to brute force): ${pass//$'\n'/}"
+}
+
+function buf() {
+	local filename="${1?}" filetime
+	filetime=$(date +%Y%m%d_%H%M%S)
+	cp -a "${filename}" "${filename}_${filetime}"
+}
+
+function docker-remove-most-recent-container() {
+	docker ps -ql | xargs docker rm
+}
+
+function docker-remove-most-recent-image() {
+	docker images -q | head -1 | xargs docker rmi
+}
+
+function docker-remove-stale-assets() {
+	docker ps --filter status=exited -q | xargs docker rm --volumes
+	docker images --filter dangling=true -q | xargs docker rmi
+}
+
+function docker-enter() {
+	docker exec -it "$@" /bin/bash
+}
+
+function docker-remove-images() {
+	local line
+	if [ -z "$1" ]; then
+		# shellcheck disable=SC2046
+		docker rmi $(docker images -q)
+	else
+		DOCKER_IMAGES=""
+		for IMAGE_ID in "$@"; do DOCKER_IMAGES="$DOCKER_IMAGES\|$IMAGE_ID"; done
+		# Find the image IDs for the supplied tags
+		ID_ARRAY=()
+		while IFS='' read -r line; do ID_ARRAY+=("$line"); done < <(docker images | grep "${DOCKER_IMAGES:2}" | awk '{print $3}')
+		# Strip out duplicate IDs before attempting to remove the image(s)
+		# shellcheck disable=SC2046
+		docker rmi $(echo "${ID_ARRAY[@]}" | tr ' ' '\n' | sort -u)
+	fi
+}
+
+function docker-image-dependencies() {
+	if hash dot 2> /dev/null; then
+		OUT=$(mktemp -t docker-viz-XXXX.png)
+		docker images -viz | dot -Tpng > "$OUT"
+		case $OSTYPE in
+			linux*)
+				xdg-open "$OUT"
+				;;
+			darwin*)
+				open "$OUT"
+				;;
+		esac
+	else
+		echo "Can't show dependencies; Graphiz is not installed" >&2
+	fi
+}
+
+function docker-runtime-environment() {
+	docker run "$@" env
+}
+
+function docker-archive-content() {
+	if [ -n "$1" ]; then
+		tar -xzOf "$1" manifest.json | jq '[.[] | .RepoTags] | add'
+	fi
+}
+
+function docker-compose-fresh() {
+	local DCO_FILE_PARAM=()
+	if [ -n "$1" ]; then
+		echo "Using docker-compose file: $1"
+		DCO_FILE_PARAM=(--file "$1")
+	fi
+
+	docker compose "${DCO_FILE_PARAM[@]}" stop
+	docker compose "${DCO_FILE_PARAM[@]}" rm -f
+	docker compose "${DCO_FILE_PARAM[@]}" up -d
+	docker compose "${DCO_FILE_PARAM[@]}" logs -f --tail 100
+}
