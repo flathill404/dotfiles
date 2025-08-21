@@ -1,3 +1,9 @@
+# macOS
+if [[ "$(uname)" = "Darwin" ]]; then
+    # activate homebrew
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # include .bashrc if it exists
 if [ -f "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
@@ -13,3 +19,4 @@ if [ -d "$HOME/.proto" ]; then
     export PROTO_HOME="$HOME/.proto";
     export PATH="$HOME/.proto/shims:$HOME/.proto/bin:$PATH"
 fi
+
