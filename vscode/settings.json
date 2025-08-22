@@ -1,4 +1,12 @@
 {
+  // Controls the font family.
+  "editor.fontFamily": "FiraCode Nerd Font Mono",
+  // Configures font ligatures or font features. Can be either a boolean to enable/disable ligatures or a string for the value of the CSS 'font-feature-settings' property.
+  "editor.fontLigatures": true,
+  // Controls the font family of the terminal. Defaults to `editor.fontFamily`'s value.
+  "terminal.integrated.fontFamily": "FiraMono Nerd Font Mono",
+  // Controls whether font ligatures are enabled in the terminal. Ligatures will only work if the configured `terminal.integrated.fontFamily` supports them.
+  "terminal.integrated.fontLigatures.enabled": true,
   // Configure settings to be overridden for python.
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
@@ -8,6 +16,7 @@
     "alacritty",
     "anond",
     "autofetch",
+    "autolinks",
     "bmewburn",
     "bradlc",
     "checkwinsize",
@@ -15,6 +24,7 @@
     "debugpy",
     "eamodio",
     "esbenp",
+    "Fira",
     "flathill",
     "geminicodeassist",
     "googlecloudtools",
@@ -23,6 +33,7 @@
     "intelephense",
     "laravel",
     "lesspipe",
+    "mdash",
     "mechatroner",
     "pylance",
     "Scand",
