@@ -2,6 +2,14 @@
 
 flathill404's dotfiles!
 
+## fonts
+
+| font family             | URL                                                                        | use                  |
+| ----------------------- | -------------------------------------------------------------------------- | -------------------- |
+| FiraCode Nerd Font Mono | https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode | editor               |
+| FiraMono Nerd Font Mono | https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraMono | terminal             |
+|                         |                                                                            | anywhere in japanese |
+
 ## stow install
 
 ```bash
