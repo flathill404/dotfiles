@@ -1,0 +1,130 @@
+{
+  "workbench.startupEditor": "none",
+  "git.autofetch": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.minimap.enabled": false,
+  "[python]": {
+    "editor.formatOnType": true,
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "explorer.confirmDelete": false,
+  "editor.accessibilitySupport": "off",
+  "vsnotes.defaultNotePath": "/Users/hiraoka/Documents/vsnotes",
+  "liveServer.settings.donotVerifyTags": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "gitlens.graph.minimap.enabled": false,
+  "gitlens.views.commitDetails.files.layout": "tree",
+  "[php]": {
+    "editor.defaultFormatter": "junstyle.php-cs-fixer"
+  },
+  "go.useLanguageServer": true,
+  "go.goroot": "/opt/homebrew/Cellar/go/1.21.5/libexec",
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.gs": "javascript"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "php.suggest.basic": false,
+  "diffEditor.ignoreTrimWhitespace": true,
+  "laravel-pint.enable": true,
+  "editor.formatOnSave": true,
+  "php.validate.executablePath": "/opt/homebrew/opt/php@8.2/bin/php",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "explorer.compactFolders": false,
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "javascript.updateImportsOnFileMove.enabled": "never",
+  "makefile.configureOnOpen": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "explorer.confirmPasteNative": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "shellscript": false
+  },
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "diffEditor.codeLens": true,
+  "cSpell.userWords": [
+    "alacritty",
+    "bmewburn",
+    "bradlc",
+    "checkwinsize",
+    "dbaeumer",
+    "debugpy",
+    "eamodio",
+    "esbenp",
+    "flathill",
+    "geminicodeassist",
+    "googlecloudtools",
+    "hiraoka",
+    "histappend",
+    "ignoreboth",
+    "intelephense",
+    "laravel",
+    "lesspipe",
+    "mechatroner",
+    "pylance",
+    "shellenv",
+    "southeners",
+    "tamasfe"
+  ],
+  "terminal.external.osxExec": "Alacritty.app",
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "path": "/opt/homebrew/bin/bash",
+      "args": ["-l"],
+      "icon": "terminal-bash"
+    }
+  },
+  "terminal.integrated.defaultProfile.osx": "bash (2)",
+  "openapi.platformUrl": "https://platform.42crunch.com",
+  "openapi.platformAuthType": "anond-token",
+  "openapi.securityAuditToken": "",
+  "openapi.platformServices": "",
+  "openapi.platformScandManager": {
+    "url": "",
+    "auth": "none",
+    "timeout": 300,
+    "header": {
+      "name": "",
+      "value": ""
+    }
+  },
+  "openapi.docker": {
+    "replaceLocalhost": true,
+    "useHostNetwork": true
+  },
+  "openapi.platformAuditRuntime": "platform",
+  "openapi.platformConformanceScanRuntime": "cli",
+  "openapi.platformConformanceScanImage": "42crunch/scand-agent:v2",
+  "openapi.platformRepository": "https://repo.42crunch.com/downloads",
+  "openapi.cliDirectoryOverride": "",
+  "openapi.platformTemporaryCollectionName": "IDE Temp Collection",
+  "openapi.platformMandatoryTags": "",
+  "openapi.internalFeatures": false,
+  "openapi.internalUseDevEndpoints": false,
+  "openapi.approvedHostnames": []
+}
