@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "42crunch.vscode-openapi",
+    "amazonwebservices.aws-toolkit-vscode",
     "bmewburn.vscode-intelephense-client",
     "bradlc.vscode-tailwindcss",
     "dbaeumer.vscode-eslint",
@@ -10,6 +11,7 @@
     "github.copilot",
     "github.copilot-chat",
     "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
     "golang.go",
     "google.geminicodeassist",
     "googlecloudtools.cloudcode",
