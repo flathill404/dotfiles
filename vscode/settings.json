@@ -1,74 +1,13 @@
 {
-  "workbench.startupEditor": "none",
-  "git.autofetch": true,
-  "editor.inlineSuggest.enabled": true,
-  "editor.minimap.enabled": false,
+  // Configure settings to be overridden for python.
   "[python]": {
-    "editor.formatOnType": true,
-    "editor.formatOnSave": false,
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
-  "liveServer.settings.donotShowInfoMsg": true,
-  "explorer.confirmDelete": false,
-  "editor.accessibilitySupport": "off",
-  "vsnotes.defaultNotePath": "/Users/hiraoka/Documents/vsnotes",
-  "liveServer.settings.donotVerifyTags": true,
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "gitlens.graph.minimap.enabled": false,
-  "gitlens.views.commitDetails.files.layout": "tree",
-  "[php]": {
-    "editor.defaultFormatter": "junstyle.php-cs-fixer"
-  },
-  "go.useLanguageServer": true,
-  "go.goroot": "/opt/homebrew/Cellar/go/1.21.5/libexec",
-  "files.associations": {
-    "*.css": "tailwindcss",
-    "*.gs": "javascript"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "php.suggest.basic": false,
-  "diffEditor.ignoreTrimWhitespace": true,
-  "laravel-pint.enable": true,
-  "editor.formatOnSave": true,
-  "php.validate.executablePath": "/opt/homebrew/opt/php@8.2/bin/php",
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "explorer.compactFolders": false,
-  "typescript.updateImportsOnFileMove.enabled": "never",
-  "javascript.updateImportsOnFileMove.enabled": "never",
-  "makefile.configureOnOpen": false,
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "explorer.confirmPasteNative": false,
-  "github.copilot.enable": {
-    "*": true,
-    "plaintext": false,
-    "markdown": false,
-    "scminput": false,
-    "shellscript": false
-  },
-  "github.copilot.nextEditSuggestions.enabled": true,
-  "diffEditor.codeLens": true,
+  // Words to add to global dictionary.
   "cSpell.userWords": [
     "alacritty",
+    "anond",
+    "autofetch",
     "bmewburn",
     "bradlc",
     "checkwinsize",
@@ -79,7 +18,6 @@
     "flathill",
     "geminicodeassist",
     "googlecloudtools",
-    "hiraoka",
     "histappend",
     "ignoreboth",
     "intelephense",
@@ -87,44 +25,85 @@
     "lesspipe",
     "mechatroner",
     "pylance",
+    "Scand",
     "shellenv",
     "southeners",
     "tamasfe"
   ],
-  "terminal.external.osxExec": "Alacritty.app",
-  "terminal.integrated.profiles.osx": {
-    "bash": {
-      "path": "/opt/homebrew/bin/bash",
-      "args": ["-l"],
-      "icon": "terminal-bash"
-    }
+  // Controls whether the editor shows CodeLens.
+  "diffEditor.codeLens": true,
+  // Controls if the UI should run in a mode where it is optimized for screen readers.
+  //  - auto: Use platform APIs to detect when a Screen Reader is attached.
+  //  - on: Optimize for usage with a Screen Reader.
+  //  - off: Assume a screen reader is not attached.
+  "editor.accessibilitySupport": "off",
+  // Defines a default formatter which takes precedence over all other formatter settings. Must be the identifier of an extension contributing a formatter.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Format a file on save. A formatter must be available and the editor must not be shutting down. When `files.autoSave` is set to `afterDelay`, the file will only be formatted when saved explicitly.
+  "editor.formatOnSave": true,
+  // Controls whether the minimap is shown.
+  "editor.minimap.enabled": false,
+  // Controls whether the Explorer should render folders in a compact form. In such a form, single child folders will be compressed in a combined tree element. Useful for Java package structures, for example.
+  "explorer.compactFolders": false,
+  // Controls whether the Explorer should ask for confirmation when deleting a file via the trash.
+  "explorer.confirmDelete": false,
+  // Controls whether the Explorer should ask for confirmation when pasting native files and folders.
+  "explorer.confirmPasteNative": false,
+  // Configure [glob patterns](https://aka.ms/vscode-glob-patterns) of file associations to languages (for example `"*.extension": "html"`). Patterns will match on the absolute path of a file if they contain a path separator and will match on the name of the file otherwise. These have precedence over the default associations of the languages installed.
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.gs": "javascript"
   },
-  "terminal.integrated.defaultProfile.osx": "bash (2)",
-  "openapi.platformUrl": "https://platform.42crunch.com",
+  // When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes.
+  "git.autofetch": true,
+  // Whether to enable next edit suggestions (NES).
+  //
+  // NES can propose a next edit based on your recent changes. [Learn more](https://aka.ms/vscode-nes) about next edit suggestions.
+  "github.copilot.nextEditSuggestions.enabled": true,
+  // Specifies whether to show a minimap of commit activity above the _Commit Graph_
+  "gitlens.graph.minimap.enabled": false,
+  // Specifies how the _Commit Details_ view will display files
+  //  - auto: Automatically switches between displaying files as a `tree` or `list` based on the `gitlens.views.commitDetails.files.threshold` value and the number of files at each nesting level
+  //  - list: Displays files as a list
+  //  - tree: Displays files as a tree
+  "gitlens.views.commitDetails.files.layout": "tree",
+  // Enable/disable [Laravel Pint](https://laravel.com/docs/9.x/pint) formatter. Remember enable for auto-formatting `editor.formatOnSave`.
+  "laravel-pint.enable": true,
+  //
+  //  - anond-token: Freemium token
+  //  - api-token: Platform IDE token
   "openapi.platformAuthType": "anond-token",
-  "openapi.securityAuditToken": "",
-  "openapi.platformServices": "",
+  // Scand Manager
   "openapi.platformScandManager": {
-    "url": "",
     "auth": "none",
-    "timeout": 300,
     "header": {
       "name": "",
       "value": ""
-    }
+    },
+    "timeout": 300,
+    "url": ""
   },
-  "openapi.docker": {
-    "replaceLocalhost": true,
-    "useHostNetwork": true
+  // Controls whether the built-in PHP language suggestions are enabled. The support suggests PHP globals and variables.
+  "php.suggest.basic": false,
+  // Customizes which terminal application to run on macOS.
+  "terminal.external.osxExec": "Alacritty.app",
+  "terminal.integrated.defaultProfile.osx": "bash",
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "args": ["-l"],
+      "icon": "terminal-bash",
+      "path": "/opt/homebrew/bin/bash"
+    },
+    "zsh": null,
+    "fish": null,
+    "tmux": null
   },
-  "openapi.platformAuditRuntime": "platform",
-  "openapi.platformConformanceScanRuntime": "cli",
-  "openapi.platformConformanceScanImage": "42crunch/scand-agent:v2",
-  "openapi.platformRepository": "https://repo.42crunch.com/downloads",
-  "openapi.cliDirectoryOverride": "",
-  "openapi.platformTemporaryCollectionName": "IDE Temp Collection",
-  "openapi.platformMandatoryTags": "",
-  "openapi.internalFeatures": false,
-  "openapi.internalUseDevEndpoints": false,
-  "openapi.approvedHostnames": []
+  // Controls which editor is shown at startup, if none are restored from the previous session.
+  //  - none: Start without an editor.
+  //  - welcomePage: Open the Welcome page, with content to aid in getting started with VS Code and extensions.
+  //  - readme: Open the README when opening a folder that contains one, fallback to 'welcomePage' otherwise. Note: This is only observed as a global configuration, it will be ignored if set in a workspace or folder configuration.
+  //  - newUntitledFile: Open a new untitled text file (only applies when opening an empty window).
+  //  - welcomePageInEmptyWorkbench: Open the Welcome page when opening an empty workbench.
+  //  - terminal: Open a new terminal in the editor area.
+  "workbench.startupEditor": "none"
 }
