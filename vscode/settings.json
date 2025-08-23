@@ -74,6 +74,7 @@
   "gitlens.views.commitDetails.files.layout": "tree",
   // Enable/disable [Laravel Pint](https://laravel.com/docs/9.x/pint) formatter. Remember enable for auto-formatting `editor.formatOnSave`.
   "laravel-pint.enable": true,
+  "laravel-pint.fallbackToGlobalBin": false,
   //
   //  - anond-token: Freemium token
   //  - api-token: Platform IDE token
