@@ -14,6 +14,10 @@ if [ -d "$HOME/bin" ] ; then
     export PATH="$HOME/bin:$PATH"
 fi
 
+if [ -d "$HOME/.local/bin" ] ; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
 # set proto PATH if it exists
 if [ -d "$HOME/.proto" ]; then
     export PROTO_HOME="$HOME/.proto";
