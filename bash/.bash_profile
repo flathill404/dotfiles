@@ -1,26 +1,9 @@
-# macOS
-if [[ "$(uname)" = "Darwin" ]]; then
-    # activate homebrew
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+# include .profile if it exists
+if [ -f "$HOME/.profile" ]; then
+    . "$HOME/.profile"
 fi
 
 # include .bashrc if it exists
 if [ -f "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
 fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    export PATH="$HOME/bin:$PATH"
-fi
-
-if [ -d "$HOME/.local/bin" ] ; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-
-# set proto PATH if it exists
-if [ -d "$HOME/.proto" ]; then
-    export PROTO_HOME="$HOME/.proto";
-    export PATH="$HOME/.proto/shims:$HOME/.proto/bin:$PATH"
-fi
-
