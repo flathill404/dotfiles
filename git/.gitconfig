@@ -1,12 +1,15 @@
 [user]
-    name = flathill404
-    email = 38638577+flathill404@users.noreply.github.com
-[include]
-    path = ~/.gitconfig.local
+	name = flathill404
+	email = 38638577+flathill404@users.noreply.github.com
+	signingkey = 74820924935EC3EA
+[commit]
+	gpgsign = true
 [init]
-    defaultBranch = main
+	defaultBranch = main
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
+[include]
+	path = ~/.gitconfig.local
