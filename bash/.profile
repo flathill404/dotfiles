@@ -23,3 +23,8 @@ if [ -d "$HOME/.proto" ]; then
     export PROTO_HOME="$HOME/.proto";
     export PATH="$HOME/.proto/shims:$HOME/.proto/bin:$PATH"
 fi
+
+# activate cargo PATH if it exists
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env"
+fi
