@@ -24,7 +24,7 @@ if [ -d "$HOME/.proto" ]; then
     export PATH="$HOME/.proto/shims:$HOME/.proto/bin:$PATH"
 fi
 
-# activate cargo PATH if it exists
+# activate cargo if it exists
 if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
 fi
