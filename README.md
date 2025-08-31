@@ -25,24 +25,35 @@ stow xmodmap
 
 ### install extensions
 
+#### Linux / macOS
+
 ```bash
 cat vscode/extensions.json | jq ".recommendations[]" | xargs -I{} code --install-extension {}
 ```
+
+#### Windows
 
 ### install settings
 
 The location of the user-level settings.json file for vscode depends on the OS.
 
-| OS      |                                                           |
-| ------- | --------------------------------------------------------- |
-| Windows | %APPDATA%\Code\User\settings.json                         |
-| macOS   | $HOME/Library/Application Support/Code/User/settings.json |
-| Linux   | $HOME/.config/Code/User/settings.json                     |
+| OS              |                                                           |
+| --------------- | --------------------------------------------------------- |
+| Linux           | $HOME/.config/Code/User/settings.json                     |
+| Windows(Native) | %APPDATA%\Code\User\settings.json                         |
+| Windows(WSL)    | $HOME/.vscode-server/data/Machine/settings.json           |
+| macOS           | $HOME/Library/Application Support/Code/User/settings.json |
 
-#### Linux / WSL
+#### Linux
 
 ```bash
 stow vscode --target="$HOME/.config/Code/User"
+```
+
+#### Windows(WSL)
+
+```bash
+stow vscode --target="$HOME/.vscode-server/data/Machine"
 ```
 
 #### macOS
