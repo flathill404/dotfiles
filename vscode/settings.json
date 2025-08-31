@@ -1,115 +1,86 @@
 {
-  // Controls the font family.
-  "editor.fontFamily": "'FiraMono Nerd Font', sans-serif",
-  // Configure settings to be overridden for python.
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-  // Words to add to global dictionary.
-  "cSpell.userWords": [
-    "alacritty",
-    "anond",
-    "autofetch",
-    "autolinks",
-    "bmewburn",
-    "bradlc",
-    "checkwinsize",
-    "dbaeumer",
-    "debugpy",
-    "DEVICON",
-    "eamodio",
-    "esbenp",
-    "Fira",
-    "flathill",
-    "geminicodeassist",
-    "googlecloudtools",
-    "histappend",
-    "ignoreboth",
-    "intelephense",
-    "laravel",
-    "lesspipe",
-    "mdash",
-    "mechatroner",
-    "pylance",
-    "Scand",
-    "shellenv",
-    "southeners",
-    "tamasfe"
-  ],
-  // Controls whether the editor shows CodeLens.
-  "diffEditor.codeLens": true,
-  // Controls if the UI should run in a mode where it is optimized for screen readers.
-  //  - auto: Use platform APIs to detect when a Screen Reader is attached.
-  //  - on: Optimize for usage with a Screen Reader.
-  //  - off: Assume a screen reader is not attached.
-  "editor.accessibilitySupport": "off",
-  // Defines a default formatter which takes precedence over all other formatter settings. Must be the identifier of an extension contributing a formatter.
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // Format a file on save. A formatter must be available and the editor must not be shutting down. When `files.autoSave` is set to `afterDelay`, the file will only be formatted when saved explicitly.
-  "editor.formatOnSave": true,
-  // Controls whether the minimap is shown.
-  "editor.minimap.enabled": false,
-  // Controls whether the Explorer should render folders in a compact form. In such a form, single child folders will be compressed in a combined tree element. Useful for Java package structures, for example.
-  "explorer.compactFolders": false,
-  // Controls whether the Explorer should ask for confirmation when deleting a file via the trash.
-  "explorer.confirmDelete": false,
-  // Controls whether the Explorer should ask for confirmation when pasting native files and folders.
-  "explorer.confirmPasteNative": false,
-  // Configure [glob patterns](https://aka.ms/vscode-glob-patterns) of file associations to languages (for example `"*.extension": "html"`). Patterns will match on the absolute path of a file if they contain a path separator and will match on the name of the file otherwise. These have precedence over the default associations of the languages installed.
-  "files.associations": {
-    "*.css": "tailwindcss",
-    "*.gs": "javascript"
-  },
-  // When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes.
-  "git.autofetch": true,
-  // Whether to enable next edit suggestions (NES).
-  //
-  // NES can propose a next edit based on your recent changes. [Learn more](https://aka.ms/vscode-nes) about next edit suggestions.
-  "github.copilot.nextEditSuggestions.enabled": true,
-  // Specifies whether to show a minimap of commit activity above the _Commit Graph_
-  "gitlens.graph.minimap.enabled": false,
-  // Specifies how the _Commit Details_ view will display files
-  //  - auto: Automatically switches between displaying files as a `tree` or `list` based on the `gitlens.views.commitDetails.files.threshold` value and the number of files at each nesting level
-  //  - list: Displays files as a list
-  //  - tree: Displays files as a tree
-  "gitlens.views.commitDetails.files.layout": "tree",
-  // Enable/disable [Laravel Pint](https://laravel.com/docs/9.x/pint) formatter. Remember enable for auto-formatting `editor.formatOnSave`.
-  "laravel-pint.fallbackToGlobalBin": false,
-  //
-  //  - anond-token: Freemium token
-  //  - api-token: Platform IDE token
-  "openapi.platformAuthType": "anond-token",
-  // Scand Manager
-  "openapi.platformScandManager": {
-    "auth": "none",
-    "header": {
-      "name": "",
-      "value": ""
-    },
-    "timeout": 300,
-    "url": ""
-  },
-  // Controls whether the built-in PHP language suggestions are enabled. The support suggests PHP globals and variables.
-  "php.suggest.basic": false,
-  // Customizes which terminal application to run on macOS.
-  "terminal.external.osxExec": "Alacritty.app",
-  "terminal.integrated.defaultProfile.osx": "bash",
-  "terminal.integrated.profiles.osx": {
-    "bash": {
-      "args": ["-l"],
-      "icon": "terminal-bash",
-      "path": "/opt/homebrew/bin/bash"
-    },
-    "zsh": null,
-    "fish": null,
-    "tmux": null
-  },
-  // Controls which editor is shown at startup, if none are restored from the previous session.
-  //  - none: Start without an editor.
-  //  - welcomePage: Open the Welcome page, with content to aid in getting started with VS Code and extensions.
-  //  - readme: Open the README when opening a folder that contains one, fallback to 'welcomePage' otherwise. Note: This is only observed as a global configuration, it will be ignored if set in a workspace or folder configuration.
-  //  - newUntitledFile: Open a new untitled text file (only applies when opening an empty window).
-  //  - welcomePageInEmptyWorkbench: Open the Welcome page when opening an empty workbench.
-  //  - terminal: Open a new terminal in the editor area.
-  "workbench.startupEditor": "none"
+	// Controls the font family.
+	"editor.fontFamily": "'FiraMono Nerd Font', sans-serif",
+	// Configure settings to be overridden for python.
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter"
+	},
+	// Words to add to global dictionary.
+	"cSpell.userWords": ["alacritty", "flathill"],
+	// Controls whether the editor shows CodeLens.
+	"diffEditor.codeLens": true,
+	// Controls if the UI should run in a mode where it is optimized for screen readers.
+	//  - auto: Use platform APIs to detect when a Screen Reader is attached.
+	//  - on: Optimize for usage with a Screen Reader.
+	//  - off: Assume a screen reader is not attached.
+	"editor.accessibilitySupport": "off",
+	// Defines a default formatter which takes precedence over all other formatter settings. Must be the identifier of an extension contributing a formatter.
+	"editor.defaultFormatter": "biomejs.biome",
+	// Format a file on save. A formatter must be available and the editor must not be shutting down. When `files.autoSave` is set to `afterDelay`, the file will only be formatted when saved explicitly.
+	"editor.formatOnSave": true,
+	// Controls whether the minimap is shown.
+	"editor.minimap.enabled": false,
+	// Controls whether the Explorer should render folders in a compact form. In such a form, single child folders will be compressed in a combined tree element. Useful for Java package structures, for example.
+	"explorer.compactFolders": false,
+	// Controls whether the Explorer should ask for confirmation when deleting a file via the trash.
+	"explorer.confirmDelete": false,
+	// Controls whether the Explorer should ask for confirmation when pasting native files and folders.
+	"explorer.confirmPasteNative": false,
+	// Configure [glob patterns](https://aka.ms/vscode-glob-patterns) of file associations to languages (for example `"*.extension": "html"`). Patterns will match on the absolute path of a file if they contain a path separator and will match on the name of the file otherwise. These have precedence over the default associations of the languages installed.
+	"files.associations": {
+		"*.css": "tailwindcss",
+		"*.gs": "javascript"
+	},
+	// When set to true, commits will automatically be fetched from the default remote of the current Git repository. Setting to `all` will fetch from all remotes.
+	"git.autofetch": true,
+	// Whether to enable next edit suggestions (NES).
+	//
+	// NES can propose a next edit based on your recent changes. [Learn more](https://aka.ms/vscode-nes) about next edit suggestions.
+	"github.copilot.nextEditSuggestions.enabled": true,
+	// Specifies whether to show a minimap of commit activity above the _Commit Graph_
+	"gitlens.graph.minimap.enabled": false,
+	// Specifies how the _Commit Details_ view will display files
+	//  - auto: Automatically switches between displaying files as a `tree` or `list` based on the `gitlens.views.commitDetails.files.threshold` value and the number of files at each nesting level
+	//  - list: Displays files as a list
+	//  - tree: Displays files as a tree
+	"gitlens.views.commitDetails.files.layout": "tree",
+	// Enable/disable [Laravel Pint](https://laravel.com/docs/9.x/pint) formatter. Remember enable for auto-formatting `editor.formatOnSave`.
+	"laravel-pint.fallbackToGlobalBin": false,
+	//
+	//  - anond-token: Freemium token
+	//  - api-token: Platform IDE token
+	"openapi.platformAuthType": "anond-token",
+	// Scand Manager
+	"openapi.platformScandManager": {
+		"auth": "none",
+		"header": {
+			"name": "",
+			"value": ""
+		},
+		"timeout": 300,
+		"url": ""
+	},
+	// Controls whether the built-in PHP language suggestions are enabled. The support suggests PHP globals and variables.
+	"php.suggest.basic": false,
+	// Customizes which terminal application to run on macOS.
+	"terminal.external.osxExec": "Alacritty.app",
+	"terminal.integrated.defaultProfile.osx": "bash",
+	"terminal.integrated.profiles.osx": {
+		"bash": {
+			"args": ["-l"],
+			"icon": "terminal-bash",
+			"path": "/opt/homebrew/bin/bash"
+		},
+		"zsh": null,
+		"fish": null,
+		"tmux": null
+	},
+	// Controls which editor is shown at startup, if none are restored from the previous session.
+	//  - none: Start without an editor.
+	//  - welcomePage: Open the Welcome page, with content to aid in getting started with VS Code and extensions.
+	//  - readme: Open the README when opening a folder that contains one, fallback to 'welcomePage' otherwise. Note: This is only observed as a global configuration, it will be ignored if set in a workspace or folder configuration.
+	//  - newUntitledFile: Open a new untitled text file (only applies when opening an empty window).
+	//  - welcomePageInEmptyWorkbench: Open the Welcome page when opening an empty workbench.
+	//  - terminal: Open a new terminal in the editor area.
+	"workbench.startupEditor": "none"
 }
