@@ -33,6 +33,10 @@ cat vscode/extensions.json | jq ".recommendations[]" | xargs -I{} code --install
 
 #### Windows
 
+```bash
+(☝︎ ՞ਊ ՞)☝︎
+```
+
 ### install settings
 
 The location of the user-level settings.json file for vscode depends on the OS.
