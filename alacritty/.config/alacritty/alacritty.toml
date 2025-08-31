@@ -8,6 +8,13 @@ bold = { family = "FiraMono Nerd Font", style="Bold" }
 italic = { family = "FiraMono Nerd Font", style="Light" }
 bold_italic = { family = "FiraMono Nerd Font", style="Bold Medium" }
 
+[keyboard]
+bindings = [
+    { key = "C", mods = "Control", action = "Copy" },
+    { key = "V", mods = "Control", action = "Paste" },
+    { key = "C", mods = "Control|Shift", chars = "\u0003" },    
+]
+
 [general]
 import = [
     "themes/vscode.toml",
