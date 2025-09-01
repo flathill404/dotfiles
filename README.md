@@ -16,6 +16,7 @@ stow git
 stow alacritty
 stow starship
 stow tmux
+stow zed
 
 # Ubuntu
 stow xmodmap
