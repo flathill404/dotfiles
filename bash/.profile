@@ -2,6 +2,11 @@
 if [[ "$(uname)" = "Darwin" ]]; then
     # activate homebrew
     eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    # enable bash completion if it exists
+    if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
+        . "/opt/homebrew/etc/profile.d/bash_completion.sh"
+    fi
 fi
 
 # run xmodmap .Xmodmap if it exists
