@@ -2,14 +2,17 @@
 
 flathill404's dotfiles!
 
-## fonts
+## Fonts
 
 | font family        | URL                                                                        | use              |
 | ------------------ | -------------------------------------------------------------------------- | ---------------- |
 | FiraMono Nerd Font | https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraMono | editor, terminal |
 
-## stow install
+## GNU Stow
 
+https://www.gnu.org/software/stow/
+
+### Linux / macOS
 ```bash
 stow bash
 stow git
@@ -17,12 +20,21 @@ stow alacritty
 stow starship
 stow tmux
 stow zed
+```
 
-# Ubuntu
+### Linux
+```bash
 stow xmodmap
 ```
 
-## vscode
+### macOS
+```bash
+stow brew
+```
+
+## Visual Studio Code
+
+https://code.visualstudio.com/
 
 ### install extensions
 
@@ -37,6 +49,7 @@ cat vscode/extensions.json | jq ".recommendations[]" | xargs -I{} code --install
 ```bash
 (☝︎ ՞ਊ ՞)☝︎
 ```
+open this repository on vscode, and install extensions from gui 😭
 
 ### install settings
 
@@ -65,4 +78,20 @@ stow vscode --target="$HOME/.vscode-server/data/Machine"
 
 ```bash
 stow vscode --target="$HOME/Library/Application Support/Code/User"
+```
+
+## Homebrew
+
+https://brew.sh/
+
+### install brew
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### install packages
+
+```bash
+brew bundle --global
 ```
