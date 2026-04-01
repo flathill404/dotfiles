@@ -1,97 +1,44 @@
 # dotfiles
 
-flathill404's dotfiles!
+Personal dotfiles for macOS (Apple Silicon). One-command setup.
 
-## Fonts
-
-| font family        | URL                                                                        | use              |
-| ------------------ | -------------------------------------------------------------------------- | ---------------- |
-| FiraMono Nerd Font | https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraMono | editor, terminal |
-
-## GNU Stow
-
-https://www.gnu.org/software/stow/
-
-### Linux / macOS
-```bash
-stow bash
-stow git
-stow alacritty
-stow starship
-stow tmux
-stow zed
-```
-
-### Linux
-```bash
-stow xmodmap
-```
-
-### macOS
-```bash
-stow brew
-```
-
-## Visual Studio Code
-
-https://code.visualstudio.com/
-
-### install extensions
-
-#### Linux / macOS
+## Quick Start
 
 ```bash
-cat vscode/extensions.json | jq ".recommendations[]" | xargs -I{} code --install-extension {}
+git clone https://github.com/flathill404/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./scripts/setup.sh
 ```
 
-#### Windows
+## What Gets Installed
 
-```bash
-(☝︎ ՞ਊ ՞)☝︎
-```
-open this repository on vscode, and install extensions from gui 😭
+- **Shell**: zsh with starship prompt, autosuggestions, syntax highlighting
+- **Terminal**: Ghostty with VS Code Dark theme
+- **Editor**: Visual Studio Code with curated extensions
+- **Containers**: Docker via Colima
+- **Languages**: Node.js, pnpm, Python via [proto](https://moonrepo.dev/proto)
+- **Tools**: git, git-lfs, gnupg, jq, tmux, stow
 
-### install settings
+## Structure
 
-The location of the user-level settings.json file for vscode depends on the OS.
+| Directory   | Target                                  | Description              |
+| ----------- | --------------------------------------- | ------------------------ |
+| `zsh/`      | `~/`                                    | Zsh shell configuration  |
+| `git/`      | `~/`                                    | Git config & global ignore |
+| `tmux/`     | `~/`                                    | Tmux configuration       |
+| `starship/` | `~/.config/`                            | Starship prompt          |
+| `ghostty/`  | `~/.config/`                            | Ghostty terminal         |
+| `brew/`     | `~/`                                    | Homebrew Brewfile        |
+| `proto/`    | `~/`                                    | Proto language manager   |
+| `vscode/`   | `~/Library/Application Support/Code/User` | VS Code settings       |
 
-| OS              |                                                           |
-| --------------- | --------------------------------------------------------- |
-| Linux           | $HOME/.config/Code/User/settings.json                     |
-| Windows(Native) | %APPDATA%\Code\User\settings.json                         |
-| Windows(WSL)    | $HOME/.vscode-server/data/Machine/settings.json           |
-| macOS           | $HOME/Library/Application Support/Code/User/settings.json |
+Symlinks are managed by [GNU Stow](https://www.gnu.org/software/stow/).
 
-#### Linux
+## Font
 
-```bash
-stow vscode --target="$HOME/.config/Code/User"
-```
+FiraMono Nerd Font — installed automatically via Homebrew.
 
-#### Windows(WSL)
+## After Setup
 
-```bash
-stow vscode --target="$HOME/.vscode-server/data/Machine"
-```
-
-#### macOS
-
-```bash
-stow vscode --target="$HOME/Library/Application Support/Code/User"
-```
-
-## Homebrew
-
-https://brew.sh/
-
-### install brew
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-### install packages
-
-```bash
-brew bundle --global
-```
+1. Import your GPG private key for git commit signing
+2. Create `~/.gitconfig.local` for machine-specific git settings (e.g. work email)

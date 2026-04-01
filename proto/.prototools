@@ -1,0 +1,7 @@
+[settings]
+auto-install = true
+
+[tools]
+node = "latest"
+pnpm = "latest"
+python = "latest"
