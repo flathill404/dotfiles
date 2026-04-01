@@ -305,6 +305,10 @@ main() {
   run_step "GPG agent configuration"     configure_gpg
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
+  # Re-stow after all installs: brew/git/gh may have created real files at the
+  # symlink targets (e.g. ~/.config/git/ignore, VS Code extensions.json).
+  # A second pass backs those up and replaces them with our dotfiles symlinks.
+  run_step "Re-stow config files"        stow_configs
 
   echo ""
   success "Setup complete! Open a new terminal to apply all changes."
