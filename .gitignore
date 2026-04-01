@@ -1,3 +1,5 @@
 .env
+.env.*
+.envrc
 *.local
 *.local.*

@@ -2,6 +2,8 @@
 # One-command setup for macOS (Apple Silicon).
 # Safe to run multiple times — each step is idempotent.
 
+set -euo pipefail
+
 DOTFILES_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BREWFILE="$DOTFILES_DIR/brew/.Brewfile"
 EXTENSIONS_FILE="$DOTFILES_DIR/vscode/extensions.json"
@@ -64,7 +66,22 @@ install_brew_packages() {
   brew bundle --file="$BREWFILE" --no-lock
 }
 
-# ── Step 4: Stow Configs ────────────────────────────────────────────────────
+# ── Step 4: Prepare directories ─────────────────────────────────────────────
+
+prepare_directories() {
+  # XDG directories
+  mkdir -p "$HOME/.config"
+  mkdir -p "$HOME/.local/share"
+  mkdir -p "$HOME/.local/state/zsh"
+  mkdir -p "$HOME/.cache/zsh"
+  mkdir -p "$HOME/.local/bin"
+
+  # SSH directory (must exist before stow)
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+}
+
+# ── Step 5: Stow Configs ────────────────────────────────────────────────────
 
 stow_configs() {
   local packages=(zsh git tmux starship ghostty brew proto)
@@ -76,6 +93,11 @@ stow_configs() {
       stow --restow "$pkg" 2>/dev/null || warn "Failed to stow $pkg (check for conflicting files)"
     fi
   done
+
+  # SSH needs --no-folding to coexist with keys and known_hosts
+  info "Stowing ssh..."
+  stow --restow --no-folding ssh 2>/dev/null \
+    || warn "Failed to stow ssh (check for conflicting files)"
 
   # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
   info "Stowing claude..."
@@ -90,7 +112,7 @@ stow_configs() {
     || warn "Failed to stow vscode (check for conflicting files)"
 }
 
-# ── Step 5: Proto + Languages ───────────────────────────────────────────────
+# ── Step 6: Proto + Languages ───────────────────────────────────────────────
 
 setup_proto() {
   if ! command -v proto &>/dev/null; then
@@ -110,7 +132,7 @@ setup_proto() {
   proto install python latest
 }
 
-# ── Step 6: VSCode Extensions ───────────────────────────────────────────────
+# ── Step 7: VSCode Extensions ───────────────────────────────────────────────
 
 install_vscode_extensions() {
   if ! command -v code &>/dev/null; then
@@ -130,7 +152,16 @@ install_vscode_extensions() {
   done
 }
 
-# ── Step 7: Default Shell ───────────────────────────────────────────────────
+# ── Step 8: fzf key bindings ────────────────────────────────────────────────
+
+setup_fzf() {
+  if [[ -f "$(brew --prefix)/opt/fzf/install" ]]; then
+    "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish
+    success "fzf key bindings installed"
+  fi
+}
+
+# ── Step 9: Default Shell ───────────────────────────────────────────────────
 
 set_default_shell() {
   if [[ "$SHELL" == "/bin/zsh" ]]; then
@@ -140,7 +171,7 @@ set_default_shell() {
   chsh -s /bin/zsh
 }
 
-# ── Step 8: GPG Agent (pinentry-mac) ────────────────────────────────────────
+# ── Step 10: GPG Agent (pinentry-mac) ───────────────────────────────────────
 
 configure_gpg() {
   local gpg_dir="$HOME/.gnupg"
@@ -148,7 +179,8 @@ configure_gpg() {
   chmod 700 "$gpg_dir"
 
   local agent_conf="$gpg_dir/gpg-agent.conf"
-  local pinentry_path="$(brew --prefix)/bin/pinentry-mac"
+  local pinentry_path
+  pinentry_path="$(brew --prefix)/bin/pinentry-mac"
 
   if [[ -f "$pinentry_path" ]]; then
     if ! grep -q "pinentry-program" "$agent_conf" 2>/dev/null; then
@@ -158,6 +190,18 @@ configure_gpg() {
       success "GPG pinentry already configured"
     fi
   fi
+}
+
+# ── Step 11: Fix Permissions ────────────────────────────────────────────────
+
+fix_permissions() {
+  "$DOTFILES_DIR/scripts/fix-permissions.sh"
+}
+
+# ── Step 12: macOS Hardening ────────────────────────────────────────────────
+
+macos_hardening() {
+  "$DOTFILES_DIR/scripts/macos-hardening.sh"
 }
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -174,11 +218,15 @@ main() {
   run_step "Xcode Command Line Tools"   install_xcode_cli
   run_step "Homebrew"                    install_homebrew
   run_step "Brew packages & casks"       install_brew_packages
+  run_step "Prepare directories"         prepare_directories
   run_step "Stow config files"           stow_configs
   run_step "Proto + languages"           setup_proto
   run_step "VSCode extensions"           install_vscode_extensions
+  run_step "fzf key bindings"            setup_fzf
   run_step "Default shell (zsh)"         set_default_shell
   run_step "GPG agent configuration"     configure_gpg
+  run_step "Fix file permissions"        fix_permissions
+  run_step "macOS security hardening"    macos_hardening
 
   echo ""
   success "Setup complete! Open a new terminal to apply all changes."
@@ -186,6 +234,8 @@ main() {
   info "Manual steps remaining:"
   info "  1. Import your GPG private key for git commit signing"
   info "  2. Create ~/.gitconfig.local for machine-specific git settings"
+  info "  3. Generate SSH key: ssh-keygen -t ed25519 -a 100"
+  info "  4. Enable FileVault in System Settings if not already on"
   echo ""
 }
 
