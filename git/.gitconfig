@@ -2,14 +2,103 @@
 	name = flathill404
 	email = 38638577+flathill404@users.noreply.github.com
 	signingkey = 74820924935EC3EA
+
 [commit]
 	gpgsign = true
+
 [init]
 	defaultBranch = main
+
+# ── Security ─────────────────────────────────────────────────────────────────
+[credential]
+	helper = osxkeychain
+
+[transfer]
+	fsckObjects = true
+
+[fetch]
+	fsckObjects = true
+	prune = true
+	pruneTags = true
+	writeCommitGraph = true
+
+[receive]
+	fsckObjects = true
+
+# ── Performance ──────────────────────────────────────────────────────────────
+[core]
+	fsmonitor = true
+	untrackedCache = true
+	commitGraph = true
+	pager = delta
+	autocrlf = input
+	whitespace = fix
+
+[pack]
+	writeReverseIndex = true
+
+# ── Delta (diff pager) ──────────────────────────────────────────────────────
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+
+# ── Diff / Merge ─────────────────────────────────────────────────────────────
+[diff]
+	algorithm = histogram
+	colorMoved = default
+	colorMovedWS = allow-indentation-change
+
+[merge]
+	conflictStyle = zdiff3
+
+# ── Pull / Push ──────────────────────────────────────────────────────────────
+[push]
+	autoSetupRemote = true
+	default = current
+
+[pull]
+	rebase = true
+
+# ── Rebase ───────────────────────────────────────────────────────────────────
+[rebase]
+	autoSquash = true
+	autoStash = true
+	updateRefs = true
+
+# ── UI ───────────────────────────────────────────────────────────────────────
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
+
+# ── Aliases ──────────────────────────────────────────────────────────────────
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status -sb
+	sw = switch
+	lg = log --oneline --graph --decorate --all
+	unstage = reset HEAD --
+	amend = commit --amend --no-edit
+	last = log -1 HEAD
+	undo = reset --soft HEAD~1
+
+# ── LFS ──────────────────────────────────────────────────────────────────────
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
+
+# ── Machine-specific overrides ───────────────────────────────────────────────
 [include]
 	path = ~/.gitconfig.local
