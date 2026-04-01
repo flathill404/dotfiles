@@ -231,7 +231,14 @@ set_default_shell() {
     success "Default shell is already zsh"
     return 0
   fi
-  chsh -s /bin/zsh
+  # chsh requires interactive password auth; skip silently in non-interactive
+  # environments (CI runners, sudo-less sessions).
+  if ! chsh -s /bin/zsh 2>/dev/null; then
+    warn "Could not change default shell to zsh (password required or non-interactive)"
+    warn "Run manually: chsh -s /bin/zsh"
+    return 0
+  fi
+  success "Default shell changed to zsh"
 }
 
 # ── Step 10: GPG Agent (pinentry-mac) ───────────────────────────────────────
