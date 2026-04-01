@@ -48,9 +48,10 @@ The setup script is idempotent — safe to run multiple times.
 | `proto/`    | `~/`                                      | Proto language version manager       |
 | `ssh/`      | `~/.ssh/` (no-folding)                    | SSH client hardening                 |
 | `claude/`   | `~/.claude/` (no-folding)                 | Claude Code settings                 |
+| `karabiner/`| `~/.config/karabiner/` (no-folding)       | Key remapping (right command ↔ fn)   |
 | `vscode/`   | `~/Library/Application Support/Code/User` | VS Code settings & extensions        |
 
-Symlinks are managed by [GNU Stow](https://www.gnu.org/software/stow/). Most packages stow normally; `ssh` and `claude` use `--no-folding` to coexist with non-tracked files (keys, auto-generated configs).
+Symlinks are managed by [GNU Stow](https://www.gnu.org/software/stow/). Most packages stow normally; `ssh`, `claude`, and `karabiner` use `--no-folding` to coexist with non-tracked files (keys, auto-generated configs, backups).
 
 ## Tools
 

@@ -37,7 +37,7 @@ The setup script runs in this order:
 
 Each package directory's internal structure maps to its stow target (default `$HOME`). For example, `zsh/.zshrc` stows to `~/.zshrc`. VSCode is the exception — it targets `~/Library/Application Support/Code/User`.
 
-Stowed packages: `zsh`, `git`, `tmux`, `starship`, `ghostty`, `brew`, `proto`, `ssh`, `claude`.
+Stowed packages: `zsh`, `git`, `tmux`, `starship`, `ghostty`, `brew`, `proto`, `ssh`, `claude`, `karabiner`.
 
 To re-stow after changes:
 ```bash
