@@ -236,7 +236,12 @@ jobs:
           check_ext "eamodio.gitlens"
           check_ext "editorconfig.editorconfig"
           check_ext "esbenp.prettier-vscode"
-          check_ext "github.copilot"
+          # github.copilot requires a paid subscription — warn only, not a hard failure
+          if echo "$INSTALLED" | grep -qi "^github.copilot$"; then
+            echo "  ✓ github.copilot"; PASS=$((PASS+1))
+          else
+            echo "  ⚠ github.copilot  ← not installed (requires paid Copilot subscription)"
+          fi
           check_ext "github.copilot-chat"
           check_ext "github.vscode-github-actions"
           check_ext "github.vscode-pull-request-github"
