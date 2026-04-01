@@ -265,7 +265,8 @@ jobs:
           check_perm() {
             local path="$1" expected="$2"
             local actual
-            actual=$(stat -f "%A" "$path" 2>/dev/null || echo "missing")
+            # -L follows symlinks so we check the target file's permissions, not the symlink itself
+            actual=$(stat -L -f "%A" "$path" 2>/dev/null || echo "missing")
             if [[ "$actual" == "$expected" ]]; then
               echo "  ✓ $path  ($actual)"; PASS=$((PASS+1))
             else
