@@ -66,6 +66,17 @@ install_brew_packages() {
   brew bundle --file="$BREWFILE"
 }
 
+# ── Step 3.5: GitHub CLI Auth ───────────────────────────────────────────────
+
+setup_gh_auth() {
+  if gh auth status &>/dev/null; then
+    success "GitHub CLI already authenticated"
+    return 0
+  fi
+  info "Authenticating with GitHub CLI (browser will open)..."
+  gh auth login --web --git-protocol https
+}
+
 # ── Step 4: Prepare directories ─────────────────────────────────────────────
 
 prepare_directories() {
@@ -169,12 +180,32 @@ generate_ssh_key() {
   chmod 600 "$key_path"
   chmod 644 "${key_path}.pub"
   success "SSH key generated"
+}
 
-  echo ""
-  info "Public key (add to GitHub → Settings → SSH keys):"
-  echo ""
-  cat "${key_path}.pub"
-  echo ""
+# ── Step 6b: Register SSH Key on GitHub ─────────────────────────────────────
+
+register_ssh_key() {
+  local pub_key="$HOME/.ssh/id_ed25519.pub"
+
+  if [[ ! -f "$pub_key" ]]; then
+    warn "No SSH public key found — skipping GitHub registration"
+    return 0
+  fi
+
+  if ! gh auth status &>/dev/null; then
+    warn "gh not authenticated — skipping SSH key registration"
+    return 0
+  fi
+
+  local fingerprint
+  fingerprint="$(ssh-keygen -lf "$pub_key" | awk '{print $2}')"
+
+  if gh ssh-key list 2>/dev/null | grep -qF "$fingerprint"; then
+    success "SSH key already registered on GitHub"
+    return 0
+  fi
+
+  gh ssh-key add "$pub_key" --title "$(hostname -s)" --type authentication
 }
 
 # ── Step 7: Proto + Languages ───────────────────────────────────────────────
@@ -306,6 +337,31 @@ configure_gpg() {
   fi
 }
 
+# ── Step 10c: Register GPG Key on GitHub ────────────────────────────────────
+
+register_gpg_key() {
+  if ! gh auth status &>/dev/null; then
+    warn "gh not authenticated — skipping GPG key registration"
+    return 0
+  fi
+
+  local key_id
+  key_id="$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null \
+    | awk '/^sec/{split($2,a,"/"); print a[2]; exit}')"
+
+  if [[ -z "$key_id" ]]; then
+    warn "No GPG secret key found — skipping GitHub registration"
+    return 0
+  fi
+
+  if gh gpg-key list 2>/dev/null | grep -qF "$key_id"; then
+    success "GPG key already registered on GitHub"
+    return 0
+  fi
+
+  gpg --export --armor "$key_id" | gh gpg-key add - --title "$(hostname -s)"
+}
+
 # ── Step 11: Fix Permissions ────────────────────────────────────────────────
 
 fix_permissions() {
@@ -332,15 +388,18 @@ main() {
   run_step "Xcode Command Line Tools"   install_xcode_cli
   run_step "Homebrew"                    install_homebrew
   run_step "Brew packages & casks"       install_brew_packages
+  run_step "GitHub CLI auth"             setup_gh_auth
   run_step "Prepare directories"         prepare_directories
   run_step "Stow config files"           stow_configs
   run_step "SSH key generation"          generate_ssh_key
+  run_step "Register SSH key on GitHub"  register_ssh_key
   run_step "Proto + languages"           setup_proto
   run_step "VS Code CLI setup"           setup_vscode_cli
   run_step "VSCode extensions"           install_vscode_extensions
   run_step "Default shell (zsh)"         set_default_shell
   run_step "GPG key import"              import_gpg_key
   run_step "GPG agent configuration"     configure_gpg
+  run_step "Register GPG key on GitHub"  register_gpg_key
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
   # Re-stow after all installs: brew/git/gh may have created real files at the
@@ -352,9 +411,8 @@ main() {
   success "Setup complete! Open a new terminal to apply all changes."
   echo ""
   info "Manual steps remaining:"
-  info "  1. Add SSH public key to GitHub: https://github.com/settings/keys"
-  info "  2. Create ~/.gitconfig.local for machine-specific git settings"
-  info "  4. Enable FileVault in System Settings if not already on"
+  info "  1. Create ~/.gitconfig.local for machine-specific git settings"
+  info "  2. Enable FileVault in System Settings if not already on"
   echo ""
 }
 
