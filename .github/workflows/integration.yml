@@ -1,0 +1,289 @@
+name: Integration Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Full Setup Test (macOS ARM64 Apple Silicon)
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    env:
+      # Prevent brew from auto-updating before each install (saves ~3min per step)
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
+      # Suppress interactive prompts in brew cask installs
+      NONINTERACTIVE: "1"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # ─── System info ────────────────────────────────────────────────────────
+      - name: System info
+        run: |
+          echo "=== Runner environment ==="
+          echo "  macOS : $(sw_vers -productVersion)"
+          echo "  Arch  : $(uname -m)"
+          echo "  Brew  : $(brew --version | head -1)"
+          echo "  Shell : $SHELL"
+          echo "  User  : $(whoami)"
+
+      # ─── Run the actual setup script ────────────────────────────────────────
+      - name: Run setup.sh
+        run: bash "$GITHUB_WORKSPACE/scripts/setup.sh"
+
+      # ─── Assertion 1: Homebrew formulas ────────────────────────────────────
+      - name: Assert - brew formulas installed
+        run: |
+          PASS=0; FAIL=0
+          check() {
+            if brew list --formula "$1" &>/dev/null; then
+              echo "  ✓ $1"; ((PASS++))
+            else
+              echo "  ✗ $1  ← MISSING"; ((FAIL++))
+            fi
+          }
+          # Core CLI
+          check git; check git-lfs; check git-delta; check gh; check gnupg
+          check jq; check yq; check stow; check tmux; check tree
+          # Shell
+          check starship; check fzf; check zoxide; check direnv
+          check zsh-autosuggestions; check zsh-syntax-highlighting
+          # Modern replacements
+          check eza; check bat; check fd; check ripgrep
+          check dust; check duf; check btop
+          # Containers & dev
+          check colima; check docker; check docker-compose
+          check lazygit; check lazydocker
+          # Security / network
+          check pinentry-mac; check age; check gitleaks
+          check xh; check wget
+          echo ""
+          echo "Brew formulas: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 2: Homebrew casks ───────────────────────────────────────
+      - name: Assert - brew casks installed
+        run: |
+          PASS=0; FAIL=0
+          check() {
+            if brew list --cask "$1" &>/dev/null; then
+              echo "  ✓ $1"; ((PASS++))
+            else
+              echo "  ✗ $1  ← MISSING"; ((FAIL++))
+            fi
+          }
+          check font-fira-mono-nerd-font
+          check ghostty
+          check google-chrome
+          check karabiner-elements
+          check rectangle
+          check slack
+          check visual-studio-code
+          echo ""
+          echo "Brew casks: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 3: Stow symlinks ─────────────────────────────────────────
+      - name: Assert - stow symlinks created
+        run: |
+          PASS=0; FAIL=0
+          check_link() {
+            if [[ -L "$1" ]]; then
+              echo "  ✓ $1  →  $(readlink "$1")"; ((PASS++))
+            else
+              echo "  ✗ $1  ← NOT a symlink ($(ls -la "$1" 2>/dev/null || echo 'missing'))"; ((FAIL++))
+            fi
+          }
+          # zsh
+          check_link "$HOME/.zshrc"
+          check_link "$HOME/.zshenv"
+          # git
+          check_link "$HOME/.gitconfig"
+          check_link "$HOME/.config/git/ignore"
+          # tmux
+          check_link "$HOME/.tmux.conf"
+          # starship
+          check_link "$HOME/.config/starship.toml"
+          # ghostty
+          check_link "$HOME/.config/ghostty/config"
+          # ssh (--no-folding)
+          check_link "$HOME/.ssh/config"
+          # claude (--no-folding)
+          check_link "$HOME/.claude/settings.json"
+          # vscode (custom target)
+          check_link "$HOME/Library/Application Support/Code/User/settings.json"
+          check_link "$HOME/Library/Application Support/Code/User/extensions.json"
+
+          echo ""
+          echo "Stow symlinks: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 4: SSH key ───────────────────────────────────────────────
+      - name: Assert - SSH key generated
+        run: |
+          PASS=0; FAIL=0
+          check_file() {
+            if [[ -f "$1" ]]; then
+              echo "  ✓ $1"; ((PASS++))
+            else
+              echo "  ✗ $1  ← MISSING"; ((FAIL++))
+            fi
+          }
+          check_file "$HOME/.ssh/id_ed25519"
+          check_file "$HOME/.ssh/id_ed25519.pub"
+          # Verify key type
+          ssh-keygen -l -f "$HOME/.ssh/id_ed25519" | grep -q "ED25519" \
+            && echo "  ✓ Key algorithm: ED25519" && ((PASS++)) \
+            || { echo "  ✗ Unexpected key algorithm"; ((FAIL++)); }
+          echo ""
+          echo "SSH key: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 5: Proto + languages ────────────────────────────────────
+      - name: Assert - proto and languages installed
+        run: |
+          export PROTO_HOME="$HOME/.proto"
+          export PATH="$PROTO_HOME/shims:$PROTO_HOME/bin:$PATH"
+
+          PASS=0; FAIL=0
+          check_cmd() {
+            if command -v "$1" &>/dev/null; then
+              echo "  ✓ $1  $("$1" --version 2>&1 | head -1)"; ((PASS++))
+            else
+              echo "  ✗ $1  ← not found"; ((FAIL++))
+            fi
+          }
+          check_cmd proto
+          check_cmd node
+          check_cmd pnpm
+          check_cmd python3
+          echo ""
+          echo "Proto/languages: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 6: VS Code CLI + extensions ──────────────────────────────
+      - name: Assert - VS Code CLI and extensions
+        run: |
+          # Homebrew cask creates a symlink at /usr/local/bin/code
+          # and also at /opt/homebrew/bin/code on ARM
+          export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+          echo "  VS Code: $(code --version | head -1)"
+          INSTALLED=$(code --list-extensions 2>/dev/null)
+
+          PASS=0; FAIL=0
+          check_ext() {
+            if echo "$INSTALLED" | grep -qi "^$1$"; then
+              echo "  ✓ $1"; ((PASS++))
+            else
+              echo "  ✗ $1  ← not installed"; ((FAIL++))
+            fi
+          }
+          check_ext "biomejs.biome"
+          check_ext "bradlc.vscode-tailwindcss"
+          check_ext "dbaeumer.vscode-eslint"
+          check_ext "eamodio.gitlens"
+          check_ext "editorconfig.editorconfig"
+          check_ext "esbenp.prettier-vscode"
+          check_ext "github.copilot"
+          check_ext "github.copilot-chat"
+          check_ext "github.vscode-github-actions"
+          check_ext "github.vscode-pull-request-github"
+          check_ext "golang.go"
+          check_ext "mechatroner.rainbow-csv"
+          check_ext "ms-python.black-formatter"
+          check_ext "ms-python.debugpy"
+          check_ext "ms-python.python"
+          check_ext "ms-python.vscode-pylance"
+          check_ext "redhat.vscode-yaml"
+          check_ext "streetsidesoftware.code-spell-checker"
+          check_ext "tamasfe.even-better-toml"
+          echo ""
+          echo "VS Code extensions: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 7: File permissions ──────────────────────────────────────
+      - name: Assert - file permissions
+        run: |
+          PASS=0; FAIL=0
+          check_perm() {
+            local path="$1" expected="$2"
+            local actual
+            actual=$(stat -f "%A" "$path" 2>/dev/null || echo "missing")
+            if [[ "$actual" == "$expected" ]]; then
+              echo "  ✓ $path  ($actual)"; ((PASS++))
+            else
+              echo "  ✗ $path  is $actual  (expected $expected)"; ((FAIL++))
+            fi
+          }
+          check_perm "$HOME/.ssh"               "700"
+          check_perm "$HOME/.ssh/id_ed25519"    "600"
+          check_perm "$HOME/.ssh/id_ed25519.pub" "644"
+          check_perm "$HOME/.ssh/config"        "644"
+          check_perm "$HOME/.gnupg"             "700"
+          echo ""
+          echo "Permissions: ${PASS} ✓  ${FAIL} ✗"
+          [[ $FAIL -eq 0 ]]
+
+      # ─── Assertion 8: GPG pinentry ──────────────────────────────────────────
+      - name: Assert - GPG pinentry configured
+        run: |
+          if grep -q "pinentry-program" "$HOME/.gnupg/gpg-agent.conf" 2>/dev/null; then
+            echo "  ✓ GPG pinentry-mac configured:"
+            grep "pinentry-program" "$HOME/.gnupg/gpg-agent.conf"
+          else
+            echo "  ✗ gpg-agent.conf missing pinentry-program"
+            echo "  Contents of $HOME/.gnupg:"
+            ls -la "$HOME/.gnupg" 2>/dev/null || echo "  (directory missing)"
+            exit 1
+          fi
+
+      # ─── Assertion 9: macOS hardening ───────────────────────────────────────
+      - name: Assert - macOS security hardening
+        run: |
+          PASS=0; WARN=0
+          check_or_warn() {
+            local desc="$1" result="$2"
+            if [[ "$result" == "ok" ]]; then
+              echo "  ✓ $desc"; ((PASS++))
+            else
+              echo "  ⚠ $desc  ← $result (non-fatal in CI)"; ((WARN++))
+            fi
+          }
+
+          # Firewall
+          fw=$(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null || echo "unavailable")
+          echo "  Firewall raw: $fw"
+          echo "$fw" | grep -qi "enabled" \
+            && check_or_warn "Firewall enabled" "ok" \
+            || check_or_warn "Firewall enabled" "$fw"
+
+          # Screen lock
+          pw=$(defaults read com.apple.screensaver askForPassword 2>/dev/null || echo "not set")
+          [[ "$pw" == "1" ]] \
+            && check_or_warn "Screen lock password required" "ok" \
+            || check_or_warn "Screen lock password required" "$pw"
+
+          # Auto-updates
+          au=$(defaults read com.apple.SoftwareUpdate AutomaticCheckEnabled 2>/dev/null || echo "not set")
+          [[ "$au" == "1" ]] \
+            && check_or_warn "Automatic updates enabled" "ok" \
+            || check_or_warn "Automatic updates enabled" "$au"
+
+          # File extensions visible
+          fe=$(defaults read NSGlobalDomain AppleShowAllExtensions 2>/dev/null || echo "not set")
+          [[ "$fe" == "1" ]] \
+            && check_or_warn "File extensions visible" "ok" \
+            || check_or_warn "File extensions visible" "$fe"
+
+          echo ""
+          echo "macOS hardening: ${PASS} ✓  ${WARN} ⚠ (warnings are non-fatal in headless CI)"
