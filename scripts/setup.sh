@@ -112,19 +112,19 @@ stow_configs() {
     if [[ -d "$pkg" ]]; then
       info "Stowing $pkg..."
       backup_stow_conflicts "$pkg"
-      stow --restow "$pkg" || warn "Failed to stow $pkg"
+      stow --restow --target="$HOME" "$pkg" || warn "Failed to stow $pkg"
     fi
   done
 
   # SSH needs --no-folding to coexist with keys and known_hosts
   info "Stowing ssh..."
   backup_stow_conflicts "ssh"
-  stow --restow --no-folding ssh || warn "Failed to stow ssh"
+  stow --restow --no-folding --target="$HOME" ssh || warn "Failed to stow ssh"
 
   # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
   info "Stowing claude..."
   backup_stow_conflicts "claude"
-  stow --restow --no-folding claude || warn "Failed to stow claude"
+  stow --restow --no-folding --target="$HOME" claude || warn "Failed to stow claude"
 
   # VSCode requires a custom target directory
   local vscode_target="$HOME/Library/Application Support/Code/User"
