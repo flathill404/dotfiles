@@ -22,7 +22,7 @@ jobs:
     name: Gitleaks Secret Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Scan full commit history, not just the latest commit
           fetch-depth: 0
@@ -31,3 +31,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # gitleaks-action v2 still targets node20; force node24 to suppress deprecation warning.
+          # Node.js 24 is backward-compatible so this is safe until an official update is released.
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
