@@ -18,7 +18,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install ShellCheck
         run: sudo apt-get install -y --no-install-recommends shellcheck
@@ -37,7 +37,7 @@ jobs:
     name: Validate Config Files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate JSON/JSONC files
         run: |
@@ -92,7 +92,7 @@ jobs:
     name: Stow Dry-Run
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install GNU Stow
         run: sudo apt-get install -y --no-install-recommends stow
@@ -127,7 +127,7 @@ jobs:
     name: macOS ARM64 (Apple Silicon)
     runs-on: macos-latest  # Apple Silicon M-series runner
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Confirm ARM64 architecture
         run: |
