@@ -19,15 +19,21 @@ The setup script is idempotent — safe to run multiple times.
 1. Xcode Command Line Tools
 2. Homebrew
 3. Brew packages & casks (`brew/.Brewfile`)
-4. Prepare XDG / SSH / Claude directories
-5. Stow all config packages as symlinks
-6. Generate Ed25519 SSH key (no passphrase)
-7. Proto + languages (Node.js, pnpm, Python)
-8. VS Code extensions
-9. Default shell → zsh
-10. GPG agent with pinentry-mac
-11. Fix file permissions (SSH, GnuPG, history)
-12. macOS security hardening
+4. GitHub CLI auth (`gh auth login --web`, skipped if already authenticated)
+5. Prepare XDG / SSH / Claude directories
+6. Stow all config packages as symlinks
+7. Generate Ed25519 SSH key (no passphrase)
+8. Register SSH key on GitHub (`gh ssh-key add`, skipped if already registered)
+9. Proto + languages (Node.js, pnpm, Python)
+10. VS Code CLI setup
+11. VS Code extensions
+12. Default shell → zsh
+13. Import GPG private key (decrypts `gnupg/private-key.gpg.asc`)
+14. GPG agent with pinentry-mac
+15. Register GPG key on GitHub (`gh gpg-key add`, skipped if already registered)
+16. Fix file permissions (SSH, GnuPG, history)
+17. macOS security hardening
+18. Re-stow config files (second pass to override any files created during install)
 
 ## Packages
 
@@ -91,18 +97,27 @@ age (encryption), gitleaks (secret scanning), pinentry-mac
 
 ## Security
 
-- **SSH**: Ed25519 key auto-generated, `IdentitiesOnly`, `HashKnownHosts`, macOS Keychain integration
+- **SSH**: Ed25519 key auto-generated, `IdentitiesOnly`, `HashKnownHosts`, macOS Keychain integration; key registered on GitHub automatically via `gh ssh-key add`
+- **GPG**: Private key stored as `gnupg/private-key.gpg.asc` (AES256 symmetric encryption); decrypted and imported automatically at setup; registered on GitHub automatically via `gh gpg-key add`; raw private key is gitignored
 - **History**: `HIST_IGNORE_SPACE` + `zshaddhistory` hook blocks `API_KEY`, `TOKEN`, `PASSWORD` patterns
 - **Permissions**: `umask 077`, scripts fix `~/.ssh` (700/600) and `~/.gnupg` (700/600)
 - **macOS**: Firewall + stealth mode, Gatekeeper, screen lock on sleep, auto security updates, remote login disabled
 - **Global gitignore**: `.env*`, `*.pem`, `*.key`, `id_*`, `credentials.json`, `.npmrc`, `.netrc`
 
+## GPG Key
+
+On the source machine, export and encrypt your GPG private key before running setup on a new machine:
+
+```bash
+./scripts/gpg-export.sh
+```
+
+This generates `gnupg/private-key.gpg.asc` (AES256 symmetric encryption). Commit the file, then run `setup.sh` on the new machine — you will be prompted for the passphrase during the import step.
+
 ## After Setup
 
-1. Add SSH public key to GitHub: https://github.com/settings/keys
-2. Import your GPG private key for git commit signing
-3. Create `~/.gitconfig.local` for machine-specific settings (e.g. work email)
-4. Enable FileVault if not already on (System Settings → Privacy & Security)
+1. Create `~/.gitconfig.local` for machine-specific settings (e.g. work email)
+2. Enable FileVault if not already on (System Settings → Privacy & Security)
 
 ## Font
 
