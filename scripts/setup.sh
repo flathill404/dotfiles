@@ -77,6 +77,11 @@ stow_configs() {
     fi
   done
 
+  # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
+  info "Stowing claude..."
+  stow --restow --no-folding claude 2>/dev/null \
+    || warn "Failed to stow claude (check for conflicting files)"
+
   # VSCode requires a custom target directory
   local vscode_target="$HOME/Library/Application Support/Code/User"
   mkdir -p "$vscode_target"

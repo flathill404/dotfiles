@@ -18,11 +18,12 @@ The setup script runs: Xcode CLI tools → Homebrew → Brew Bundle → Stow con
 
 Each package directory's internal structure maps to its stow target (default `$HOME`). For example, `zsh/.zshrc` stows to `~/.zshrc`. VSCode is the exception — it targets `~/Library/Application Support/Code/User`.
 
-Stowed packages: `zsh`, `git`, `tmux`, `starship`, `ghostty`, `brew`, `proto`.
+Stowed packages: `zsh`, `git`, `tmux`, `starship`, `ghostty`, `brew`, `proto`, `claude`.
 
 To re-stow after changes:
 ```bash
 stow --restow <package>                    # most packages
+stow --restow --no-folding claude          # file-level symlinks (coexists with auto-generated files)
 stow --restow --target="$HOME/Library/Application Support/Code/User" vscode
 ```
 
