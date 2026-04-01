@@ -37,8 +37,10 @@ zstyle ':completion:*:descriptions' format '%F{green}-- %d --%f'
 zstyle ':completion:*:warnings' format '%F{red}-- no matches --%f'
 
 # ── Plugins (via Homebrew — hardcoded path for performance) ──────────────────
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+[[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+  && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+[[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+  && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # ── Key Bindings ─────────────────────────────────────────────────────────────
 bindkey -e
@@ -142,4 +144,6 @@ if (( $+commands[direnv] )); then
 fi
 
 # ── Prompt ───────────────────────────────────────────────────────────────────
-eval "$(starship init zsh)"
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi

@@ -5,7 +5,7 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
 
 # ── Homebrew (Apple Silicon) ─────────────────────────────────────────────────
-eval "$(/opt/homebrew/bin/brew shellenv)"
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # ── User bin directories ─────────────────────────────────────────────────────
 [[ -d "$HOME/bin" ]] && export PATH="$HOME/bin:$PATH"
