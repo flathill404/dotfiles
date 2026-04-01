@@ -44,6 +44,7 @@ brew "xh"                # modern httpie (API testing)
 brew "wget"
 
 # ── Casks ────────────────────────────────────────────────────────────────────
+cask "cmux"                  # Ghostty-based terminal with vertical tabs for AI coding agents
 cask "font-fira-mono-nerd-font"
 cask "ghostty"
 cask "google-chrome"
