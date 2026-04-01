@@ -112,26 +112,34 @@ stow_configs() {
     if [[ -d "$pkg" ]]; then
       info "Stowing $pkg..."
       backup_stow_conflicts "$pkg"
-      stow --restow --target="$HOME" "$pkg" || warn "Failed to stow $pkg"
+      if ! stow --restow --target="$HOME" "$pkg"; then
+        warn "Failed to stow $pkg — check for conflicting files above"
+      fi
     fi
   done
 
   # SSH needs --no-folding to coexist with keys and known_hosts
   info "Stowing ssh..."
   backup_stow_conflicts "ssh"
-  stow --restow --no-folding --target="$HOME" ssh || warn "Failed to stow ssh"
+  if ! stow --restow --no-folding --target="$HOME" ssh; then
+    warn "Failed to stow ssh"
+  fi
 
   # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
   info "Stowing claude..."
   backup_stow_conflicts "claude"
-  stow --restow --no-folding --target="$HOME" claude || warn "Failed to stow claude"
+  if ! stow --restow --no-folding --target="$HOME" claude; then
+    warn "Failed to stow claude"
+  fi
 
   # VSCode requires a custom target directory
   local vscode_target="$HOME/Library/Application Support/Code/User"
   mkdir -p "$vscode_target"
   info "Stowing vscode..."
   backup_stow_conflicts "vscode" "$vscode_target"
-  stow --restow --target="$vscode_target" vscode || warn "Failed to stow vscode"
+  if ! stow --restow --target="$vscode_target" vscode; then
+    warn "Failed to stow vscode"
+  fi
 }
 
 # ── Step 6: SSH Key Generation ──────────────────────────────────────────────
