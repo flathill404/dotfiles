@@ -44,6 +44,8 @@ brew "xh"                # modern httpie (API testing)
 brew "wget"
 
 # ── Casks ────────────────────────────────────────────────────────────────────
+cask "claude"                # Claude desktop app
+cask "claude-code"           # Claude Code CLI (terminal AI coding assistant)
 cask "cmux"                  # Ghostty-based terminal with vertical tabs for AI coding agents
 cask "font-fira-mono-nerd-font"
 cask "ghostty"
