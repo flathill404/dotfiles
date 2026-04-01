@@ -3,3 +3,9 @@
 .envrc
 *.local
 *.local.*
+
+# GPG — only the encrypted export is tracked; raw keys must never be committed
+secret.gpg
+gnupg/*.key
+gnupg/*.pem
+gnupg/secring*
