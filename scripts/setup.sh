@@ -93,6 +93,9 @@ prepare_directories() {
 
   # Claude directory (must exist before stow --no-folding)
   mkdir -p "$HOME/.claude"
+
+  # Karabiner directory (must exist before stow --no-folding)
+  mkdir -p "$HOME/.config/karabiner"
 }
 
 # ── Step 5: Stow Configs ────────────────────────────────────────────────────
@@ -153,6 +156,13 @@ stow_configs() {
   backup_stow_conflicts "claude"
   if ! stow --restow --no-folding --target="$HOME" claude; then
     warn "Failed to stow claude"
+  fi
+
+  # Karabiner needs --no-folding to coexist with automatic_backups/ in ~/.config/karabiner/
+  info "Stowing karabiner..."
+  backup_stow_conflicts "karabiner"
+  if ! stow --restow --no-folding --target="$HOME" karabiner; then
+    warn "Failed to stow karabiner"
   fi
 
   # VSCode requires a custom target directory
