@@ -39,12 +39,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate JSON files
+      - name: Validate JSON/JSONC files
         run: |
-          echo "=== JSON validation ==="
+          echo "=== JSON/JSONC validation ==="
+          # json5 handles standard JSON as well as JSONC (comments, trailing commas)
+          # claude/.claude/settings.json uses JSONC format (// comments)
+          pip3 install --quiet json5
           find . -name '*.json' ! -path './.git/*' | sort | while IFS= read -r f; do
             echo "  Checking: $f"
-            python3 -m json.tool "$f" > /dev/null
+            python3 -c "import json5, sys; json5.load(open(sys.argv[1]))" "$f"
             echo "  OK"
           done
 
