@@ -374,6 +374,12 @@ macos_hardening() {
   "$DOTFILES_DIR/scripts/macos-hardening.sh"
 }
 
+# ── Step 13: macOS Speedup ───────────────────────────────────────────────────
+
+macos_speedup() {
+  "$DOTFILES_DIR/scripts/macos-speedup.sh"
+}
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 main() {
@@ -402,6 +408,7 @@ main() {
   run_step "Register GPG key on GitHub"  register_gpg_key
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
+  run_step "macOS performance tuning"    macos_speedup
   # Re-stow after all installs: brew/git/gh may have created real files at the
   # symlink targets (e.g. ~/.config/git/ignore, VS Code extensions.json).
   # A second pass backs those up and replaces them with our dotfiles symlinks.
