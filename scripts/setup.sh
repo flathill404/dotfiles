@@ -2,7 +2,7 @@
 # One-command setup for macOS (Apple Silicon).
 # Safe to run multiple times — each step is idempotent.
 
-set -euo pipefail
+set -uo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BREWFILE="$DOTFILES_DIR/brew/.Brewfile"
@@ -56,7 +56,7 @@ install_homebrew() {
     success "Homebrew already installed"
     return 0
   fi
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   eval "$(/opt/homebrew/bin/brew shellenv)"
 }
 
@@ -79,6 +79,9 @@ prepare_directories() {
   # SSH directory (must exist before stow)
   mkdir -p "$HOME/.ssh"
   chmod 700 "$HOME/.ssh"
+
+  # Claude directory (must exist before stow --no-folding)
+  mkdir -p "$HOME/.claude"
 }
 
 # ── Step 5: Stow Configs ────────────────────────────────────────────────────
@@ -112,7 +115,30 @@ stow_configs() {
     || warn "Failed to stow vscode (check for conflicting files)"
 }
 
-# ── Step 6: Proto + Languages ───────────────────────────────────────────────
+# ── Step 6: SSH Key Generation ──────────────────────────────────────────────
+
+generate_ssh_key() {
+  local key_path="$HOME/.ssh/id_ed25519"
+
+  if [[ -f "$key_path" ]]; then
+    success "SSH key already exists at $key_path"
+    return 0
+  fi
+
+  info "Generating Ed25519 SSH key (no passphrase)..."
+  ssh-keygen -t ed25519 -a 100 -f "$key_path" -N "" -C "flathill404"
+  chmod 600 "$key_path"
+  chmod 644 "${key_path}.pub"
+  success "SSH key generated"
+
+  echo ""
+  info "Public key (add to GitHub → Settings → SSH keys):"
+  echo ""
+  cat "${key_path}.pub"
+  echo ""
+}
+
+# ── Step 7: Proto + Languages ───────────────────────────────────────────────
 
 setup_proto() {
   if ! command -v proto &>/dev/null; then
@@ -132,7 +158,7 @@ setup_proto() {
   proto install python latest
 }
 
-# ── Step 7: VSCode Extensions ───────────────────────────────────────────────
+# ── Step 8: VSCode Extensions ───────────────────────────────────────────────
 
 install_vscode_extensions() {
   if ! command -v code &>/dev/null; then
@@ -150,15 +176,6 @@ install_vscode_extensions() {
     code --install-extension "$ext" --force 2>/dev/null \
       || warn "Failed to install extension: $ext"
   done
-}
-
-# ── Step 8: fzf key bindings ────────────────────────────────────────────────
-
-setup_fzf() {
-  if [[ -f "$(brew --prefix)/opt/fzf/install" ]]; then
-    "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish
-    success "fzf key bindings installed"
-  fi
 }
 
 # ── Step 9: Default Shell ───────────────────────────────────────────────────
@@ -179,8 +196,7 @@ configure_gpg() {
   chmod 700 "$gpg_dir"
 
   local agent_conf="$gpg_dir/gpg-agent.conf"
-  local pinentry_path
-  pinentry_path="$(brew --prefix)/bin/pinentry-mac"
+  local pinentry_path="/opt/homebrew/bin/pinentry-mac"
 
   if [[ -f "$pinentry_path" ]]; then
     if ! grep -q "pinentry-program" "$agent_conf" 2>/dev/null; then
@@ -220,9 +236,9 @@ main() {
   run_step "Brew packages & casks"       install_brew_packages
   run_step "Prepare directories"         prepare_directories
   run_step "Stow config files"           stow_configs
+  run_step "SSH key generation"          generate_ssh_key
   run_step "Proto + languages"           setup_proto
   run_step "VSCode extensions"           install_vscode_extensions
-  run_step "fzf key bindings"            setup_fzf
   run_step "Default shell (zsh)"         set_default_shell
   run_step "GPG agent configuration"     configure_gpg
   run_step "Fix file permissions"        fix_permissions
@@ -232,9 +248,9 @@ main() {
   success "Setup complete! Open a new terminal to apply all changes."
   echo ""
   info "Manual steps remaining:"
-  info "  1. Import your GPG private key for git commit signing"
-  info "  2. Create ~/.gitconfig.local for machine-specific git settings"
-  info "  3. Generate SSH key: ssh-keygen -t ed25519 -a 100"
+  info "  1. Add SSH public key to GitHub: https://github.com/settings/keys"
+  info "  2. Import your GPG private key for git commit signing"
+  info "  3. Create ~/.gitconfig.local for machine-specific git settings"
   info "  4. Enable FileVault in System Settings if not already on"
   echo ""
 }
