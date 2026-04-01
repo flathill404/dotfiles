@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun run typecheck:*)"
+    ]
+  },
+  "model": "opus",
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "max"
+}
