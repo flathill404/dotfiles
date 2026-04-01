@@ -43,7 +43,9 @@ success "File extensions visible"
 
 # ── Remote Access ────────────────────────────────────────────────────────────
 info "Disabling remote login (SSH server)..."
-if sudo systemsetup -setremotelogin off 2>/dev/null; then
+# systemsetup prompts for confirmation when SSH sessions are active.
+# Pipe "yes" to auto-answer so the script never hangs.
+if echo "yes" | sudo systemsetup -setremotelogin off 2>/dev/null; then
   success "Remote login disabled"
 else
   warn "Failed to disable remote login (may need Full Disk Access)"
