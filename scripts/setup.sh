@@ -261,7 +261,32 @@ set_default_shell() {
   success "Default shell changed to zsh"
 }
 
-# ── Step 10: GPG Agent (pinentry-mac) ───────────────────────────────────────
+# ── Step 10a: GPG Key Import ────────────────────────────────────────────────
+
+import_gpg_key() {
+  local encrypted_key="$DOTFILES_DIR/gnupg/private-key.gpg.asc"
+
+  if [[ ! -f "$encrypted_key" ]]; then
+    warn "No encrypted GPG key found at gnupg/private-key.gpg.asc — skipping"
+    return 0
+  fi
+
+  # Idempotent: skip if a secret key is already in the keyring
+  if gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep -q "^sec"; then
+    success "GPG secret key already in keyring"
+    return 0
+  fi
+
+  info "Enter the passphrase used to encrypt gnupg/private-key.gpg.asc:"
+  if gpg --decrypt "$encrypted_key" 2>/dev/null | gpg --import; then
+    success "GPG private key imported successfully"
+  else
+    warn "GPG key import failed — import manually: gpg --import <key>"
+    return 1
+  fi
+}
+
+# ── Step 10b: GPG Agent (pinentry-mac) ──────────────────────────────────────
 
 configure_gpg() {
   local gpg_dir="$HOME/.gnupg"
@@ -314,6 +339,7 @@ main() {
   run_step "VS Code CLI setup"           setup_vscode_cli
   run_step "VSCode extensions"           install_vscode_extensions
   run_step "Default shell (zsh)"         set_default_shell
+  run_step "GPG key import"              import_gpg_key
   run_step "GPG agent configuration"     configure_gpg
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
@@ -327,8 +353,7 @@ main() {
   echo ""
   info "Manual steps remaining:"
   info "  1. Add SSH public key to GitHub: https://github.com/settings/keys"
-  info "  2. Import your GPG private key for git commit signing"
-  info "  3. Create ~/.gitconfig.local for machine-specific git settings"
+  info "  2. Create ~/.gitconfig.local for machine-specific git settings"
   info "  4. Enable FileVault in System Settings if not already on"
   echo ""
 }
