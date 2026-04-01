@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Minimal permissions — read-only content access
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────
+  # 1. Shell script linting
+  # ─────────────────────────────────────────────
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y --no-install-recommends shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          echo "=== ShellCheck ==="
+          shellcheck --severity=warning scripts/setup.sh
+          shellcheck --severity=warning scripts/fix-permissions.sh
+          shellcheck --severity=warning scripts/macos-hardening.sh
+
+  # ─────────────────────────────────────────────
+  # 2. Config file syntax validation
+  # ─────────────────────────────────────────────
+  validate-configs:
+    name: Validate Config Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "=== JSON validation ==="
+          find . -name '*.json' ! -path './.git/*' | sort | while IFS= read -r f; do
+            echo "  Checking: $f"
+            python3 -m json.tool "$f" > /dev/null
+            echo "  OK"
+          done
+
+      - name: Validate TOML files
+        run: |
+          echo "=== TOML validation ==="
+          # tomllib is stdlib since Python 3.11; fall back to tomli on older versions
+          VALIDATE_TOML='
+          import sys, pathlib
+          try:
+              import tomllib
+          except ImportError:
+              import subprocess, sys as _sys
+              subprocess.check_call([_sys.executable, "-m", "pip", "install", "-q", "tomli"])
+              import tomli as tomllib
+          for path in sys.argv[1:]:
+              with open(path, "rb") as fh:
+                  tomllib.load(fh)
+              print(f"  OK: {path}")
+          '
+          # Find .toml files
+          mapfile -t toml_files < <(find . -name '*.toml' ! -path './.git/*' | sort)
+          # Also validate .prototools (TOML format but no .toml extension)
+          python3 -c "$VALIDATE_TOML" "${toml_files[@]}" proto/.prototools
+
+      - name: Validate git config syntax
+        run: |
+          echo "=== git config validation ==="
+          git config --file git/.gitconfig --list > /dev/null
+          echo "  OK: git/.gitconfig"
+
+      - name: Validate Brewfile Ruby syntax
+        run: |
+          echo "=== Brewfile syntax ==="
+          ruby -c brew/.Brewfile
+          echo "  OK"
+
+  # ─────────────────────────────────────────────
+  # 3. GNU Stow dry-run (conflict detection)
+  # ─────────────────────────────────────────────
+  stow-simulate:
+    name: Stow Dry-Run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GNU Stow
+        run: sudo apt-get install -y --no-install-recommends stow
+
+      - name: Simulate stow for all packages
+        run: |
+          # Use a temp dir as target to avoid conflicts with runner's home
+          STOW_TARGET=$(mktemp -d)
+          echo "Target: $STOW_TARGET"
+
+          echo "=== Standard packages ==="
+          for pkg in zsh git tmux starship ghostty brew proto; do
+            echo "  Simulating: $pkg"
+            stow --simulate --target="$STOW_TARGET" "$pkg"
+            echo "  OK"
+          done
+
+          echo "=== No-folding packages (ssh, claude) ==="
+          for pkg in ssh claude; do
+            echo "  Simulating: $pkg"
+            stow --simulate --no-folding --target="$STOW_TARGET" "$pkg"
+            echo "  OK"
+          done
+
+          # vscode targets ~/Library/Application Support/Code/User (macOS only)
+          echo "  Skipping: vscode (macOS Library path — tested in macos-arm job)"
+
+  # ─────────────────────────────────────────────
+  # 4. macOS Apple Silicon validation
+  # ─────────────────────────────────────────────
+  macos-arm:
+    name: macOS ARM64 (Apple Silicon)
+    runs-on: macos-latest  # Apple Silicon M-series runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm ARM64 architecture
+        run: |
+          arch_name=$(uname -m)
+          echo "Architecture: $arch_name"
+          if [ "$arch_name" != "arm64" ]; then
+            echo "ERROR: Expected arm64 runner, got $arch_name"
+            exit 1
+          fi
+
+      - name: Verify Homebrew (ARM)
+        run: |
+          brew --version
+          # Confirm Homebrew is installed at the ARM path
+          test -x /opt/homebrew/bin/brew && echo "  Homebrew at /opt/homebrew (ARM) OK"
+
+      - name: Validate zsh script syntax
+        run: |
+          echo "=== zsh syntax check ==="
+          zsh -n zsh/.zshenv && echo "  .zshenv OK"
+          zsh -n zsh/.zshrc  && echo "  .zshrc OK"
+
+      - name: Validate bash script syntax
+        run: |
+          echo "=== bash syntax check ==="
+          bash -n scripts/setup.sh          && echo "  setup.sh OK"
+          bash -n scripts/fix-permissions.sh && echo "  fix-permissions.sh OK"
+          bash -n scripts/macos-hardening.sh && echo "  macos-hardening.sh OK"
+
+      - name: Validate Brewfile (dry-run)
+        run: |
+          echo "=== Brewfile dry-run ==="
+          # exit 1 is expected when packages are not installed — suppress it.
+          # The goal here is output inspection (formula names, tap correctness),
+          # not confirming everything is installed.
+          brew bundle --file=brew/.Brewfile --dry-run 2>&1 | head -100 || true
+          echo "=== Brewfile dry-run complete ==="
+
+      - name: Stow dry-run (macOS paths)
+        run: |
+          brew install stow --quiet
+          STOW_TARGET=$(mktemp -d)
+
+          echo "=== Stow simulate on macOS ==="
+          for pkg in zsh git tmux starship ghostty brew proto; do
+            echo "  Simulating: $pkg"
+            stow --simulate --target="$STOW_TARGET" "$pkg"
+            echo "  OK"
+          done
+
+          for pkg in ssh claude; do
+            echo "  Simulating: $pkg"
+            stow --simulate --no-folding --target="$STOW_TARGET" "$pkg"
+            echo "  OK"
+          done
+
+          # vscode: simulate with a temp Library-like target
+          VSCODE_TARGET=$(mktemp -d)
+          echo "  Simulating: vscode (against temp target)"
+          stow --simulate --target="$VSCODE_TARGET" vscode
+          echo "  OK"

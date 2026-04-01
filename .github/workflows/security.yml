@@ -1,0 +1,33 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly full-history scan every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+# security-events: write is required for SARIF upload to GitHub Security tab
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Secret scanning with Gitleaks
+  # ─────────────────────────────────────────────
+  gitleaks:
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Scan full commit history, not just the latest commit
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
