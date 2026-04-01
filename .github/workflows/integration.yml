@@ -46,21 +46,24 @@ jobs:
       - name: Assert - CLI tools available
         run: |
           PASS=0; FAIL=0
+          # NOTE: use PASS=$((PASS+1)) instead of PASS=$((PASS+1)) to avoid bash -e exit
+          # when the counter is 0 (arithmetic 0 = false = exit code 1 in bash -e).
+
           # Check via brew list (managed by Brewfile)
           check_brew() {
             if brew list "$1" &>/dev/null; then
-              echo "  ✓ $1 (brew)"; ((PASS++))
+              echo "  ✓ $1 (brew)"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← not in brew list"; ((FAIL++))
+              echo "  ✗ $1  ← not in brew list"; FAIL=$((FAIL+1))
             fi
           }
           # Check via command availability (works even if installed outside brew)
           check_cmd() {
             local cmd="${2:-$1}"
             if command -v "$cmd" &>/dev/null; then
-              echo "  ✓ $1  ($(command -v "$cmd"))"; ((PASS++))
+              echo "  ✓ $1  ($(command -v "$cmd"))"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← command '$cmd' not found"; ((FAIL++))
+              echo "  ✗ $1  ← command '$cmd' not found"; FAIL=$((FAIL+1))
             fi
           }
 
@@ -94,9 +97,9 @@ jobs:
           PASS=0; FAIL=0
           check() {
             if brew list --cask "$1" &>/dev/null; then
-              echo "  ✓ $1"; ((PASS++))
+              echo "  ✓ $1"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← MISSING"; ((FAIL++))
+              echo "  ✗ $1  ← MISSING"; FAIL=$((FAIL+1))
             fi
           }
           check font-fira-mono-nerd-font
@@ -116,9 +119,9 @@ jobs:
           PASS=0; FAIL=0
           check_link() {
             if [[ -L "$1" ]]; then
-              echo "  ✓ $1  →  $(readlink "$1")"; ((PASS++))
+              echo "  ✓ $1  →  $(readlink "$1")"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← NOT a symlink ($(ls -la "$1" 2>/dev/null || echo 'missing'))"; ((FAIL++))
+              echo "  ✗ $1  ← NOT a symlink ($(ls -la "$1" 2>/dev/null || echo 'missing'))"; FAIL=$((FAIL+1))
             fi
           }
           # zsh
@@ -151,17 +154,17 @@ jobs:
           PASS=0; FAIL=0
           check_file() {
             if [[ -f "$1" ]]; then
-              echo "  ✓ $1"; ((PASS++))
+              echo "  ✓ $1"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← MISSING"; ((FAIL++))
+              echo "  ✗ $1  ← MISSING"; FAIL=$((FAIL+1))
             fi
           }
           check_file "$HOME/.ssh/id_ed25519"
           check_file "$HOME/.ssh/id_ed25519.pub"
           # Verify key type
           ssh-keygen -l -f "$HOME/.ssh/id_ed25519" | grep -q "ED25519" \
-            && echo "  ✓ Key algorithm: ED25519" && ((PASS++)) \
-            || { echo "  ✗ Unexpected key algorithm"; ((FAIL++)); }
+            && echo "  ✓ Key algorithm: ED25519" && PASS=$((PASS+1)) \
+            || { echo "  ✗ Unexpected key algorithm"; FAIL=$((FAIL+1)); }
           echo ""
           echo "SSH key: ${PASS} ✓  ${FAIL} ✗"
           [[ $FAIL -eq 0 ]]
@@ -175,9 +178,9 @@ jobs:
           PASS=0; FAIL=0
           check_cmd() {
             if command -v "$1" &>/dev/null; then
-              echo "  ✓ $1  $("$1" --version 2>&1 | head -1)"; ((PASS++))
+              echo "  ✓ $1  $("$1" --version 2>&1 | head -1)"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← not found"; ((FAIL++))
+              echo "  ✗ $1  ← not found"; FAIL=$((FAIL+1))
             fi
           }
           check_cmd proto
@@ -202,9 +205,9 @@ jobs:
           PASS=0; FAIL=0
           check_ext() {
             if echo "$INSTALLED" | grep -qi "^$1$"; then
-              echo "  ✓ $1"; ((PASS++))
+              echo "  ✓ $1"; PASS=$((PASS+1))
             else
-              echo "  ✗ $1  ← not installed"; ((FAIL++))
+              echo "  ✗ $1  ← not installed"; FAIL=$((FAIL+1))
             fi
           }
           check_ext "biomejs.biome"
@@ -239,9 +242,9 @@ jobs:
             local actual
             actual=$(stat -f "%A" "$path" 2>/dev/null || echo "missing")
             if [[ "$actual" == "$expected" ]]; then
-              echo "  ✓ $path  ($actual)"; ((PASS++))
+              echo "  ✓ $path  ($actual)"; PASS=$((PASS+1))
             else
-              echo "  ✗ $path  is $actual  (expected $expected)"; ((FAIL++))
+              echo "  ✗ $path  is $actual  (expected $expected)"; FAIL=$((FAIL+1))
             fi
           }
           check_perm "$HOME/.ssh"               "700"
@@ -273,9 +276,9 @@ jobs:
           check_or_warn() {
             local desc="$1" result="$2"
             if [[ "$result" == "ok" ]]; then
-              echo "  ✓ $desc"; ((PASS++))
+              echo "  ✓ $desc"; PASS=$((PASS+1))
             else
-              echo "  ⚠ $desc  ← $result (non-fatal in CI)"; ((WARN++))
+              echo "  ⚠ $desc  ← $result (non-fatal in CI)"; WARN=$((WARN+1))
             fi
           }
 
