@@ -1,10 +1,65 @@
 {
+  "model": "opus",
+  "effortLevel": "high",
+  "autoUpdatesChannel": "stable",
+  "cleanupPeriodDays": 30,
   "permissions": {
     "allow": [
-      "Bash(bun run typecheck:*)"
+      // Git (read-only)
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git stash list*)",
+      "Bash(git remote -v*)",
+      "Bash(git fetch*)",
+
+      // GitHub CLI (read-only)
+      "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh issue view*)",
+      "Bash(gh issue list*)",
+      "Bash(gh repo view*)",
+      "Bash(gh run view*)",
+
+      // Shell utilities (read-only)
+      "Bash(ls *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(man *)",
+
+      // Package managers (read-only)
+      "Bash(brew list*)",
+      "Bash(brew info*)",
+      "Bash(brew search*)",
+      "Bash(proto list*)",
+      "Bash(proto status*)",
+
+      // Docker (read-only)
+      "Bash(docker ps*)",
+      "Bash(docker images*)",
+      "Bash(docker logs*)",
+      "Bash(docker compose ps*)",
+      "Bash(docker compose logs*)",
+
+      // Utilities
+      "Bash(jq *)",
+      "Bash(stow *)"
+    ],
+    "deny": [
+      // Secrets & credentials
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/credentials.json)",
+      "Read(**/.npmrc)",
+      "Read(**/.netrc)"
     ]
   },
-  "model": "opus",
-  "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "max"
+  "env": {}
 }
