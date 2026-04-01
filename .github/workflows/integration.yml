@@ -147,14 +147,6 @@ jobs:
           # zsh
           check_link "$HOME/.zshrc"
           check_link "$HOME/.zshenv"
-          # Debug: show .config structure
-          echo "  [debug] ~/.config contents:"
-          ls -la "$HOME/.config/" 2>/dev/null | sed 's/^/    /'
-          echo "  [debug] ~/.config/git/ contents (if accessible):"
-          ls -la "$HOME/.config/git/" 2>/dev/null | sed 's/^/    /' || echo "    (not accessible)"
-          echo "  [debug] readlink ~/.config/git: $(readlink "$HOME/.config/git" 2>/dev/null || echo n/a)"
-          echo "  [debug] umask: $(umask)"
-
           # git: stow folds ~/.config/git → dotfiles dir symlink
           check_dir_link_and_file "$HOME/.config/git" "$HOME/.config/git/ignore"
           check_link "$HOME/.gitconfig"
