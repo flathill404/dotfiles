@@ -89,6 +89,9 @@ prepare_directories() {
 # Back up any non-symlink files that would conflict with stow.
 # This lets setup.sh run safely on machines that already have dotfiles.
 # Backed-up files get a .dotfiles.bak suffix; nothing is silently deleted.
+#
+# Safety: if $dest resolves (via symlinks) to a path inside $DOTFILES_DIR,
+# it is already managed by stow — skip it to avoid renaming our own files.
 backup_stow_conflicts() {
   local pkg="$1"
   local target="${2:-$HOME}"
@@ -98,6 +101,15 @@ backup_stow_conflicts() {
     local rel="${src#${pkg_dir}/}"
     local dest="$target/$rel"
     if [[ -e "$dest" && ! -L "$dest" ]]; then
+      # Check if the real path of $dest lives inside our dotfiles directory.
+      # This happens when an ancestor directory is already a stow symlink
+      # pointing back into DOTFILES_DIR (e.g. ~/.config/git → dotfiles/git/.config/git).
+      local real_dest
+      real_dest=$(realpath "$dest" 2>/dev/null || echo "")
+      if [[ -n "$real_dest" && "$real_dest" == "$DOTFILES_DIR"* ]]; then
+        # Already owned by our dotfiles — do not touch it.
+        continue
+      fi
       warn "Backing up conflicting file: $dest → ${dest}.dotfiles.bak"
       mv "$dest" "${dest}.dotfiles.bak"
     fi
