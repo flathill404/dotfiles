@@ -117,6 +117,8 @@ jobs:
       - name: Assert - stow symlinks created
         run: |
           PASS=0; FAIL=0
+
+          # Direct symlink check (the path itself must be a symlink)
           check_link() {
             if [[ -L "$1" ]]; then
               echo "  ✓ $1  →  $(readlink "$1")"; PASS=$((PASS+1))
@@ -124,18 +126,36 @@ jobs:
               echo "  ✗ $1  ← NOT a symlink ($(ls -la "$1" 2>/dev/null || echo 'missing'))"; FAIL=$((FAIL+1))
             fi
           }
+
+          # For packages where stow "folds" a sub-directory into a single symlink
+          # (e.g. git/.config/git → ~/.config/git), check the directory symlink
+          # rather than the file inside it.  Also verify the file is accessible.
+          check_dir_link_and_file() {
+            local dir_link="$1" file_inside="$2"
+            if [[ -L "$dir_link" ]]; then
+              echo "  ✓ $dir_link  →  $(readlink "$dir_link") (dir symlink)"; PASS=$((PASS+1))
+              if [[ -f "$file_inside" ]]; then
+                echo "    ✓ $file_inside  accessible"; PASS=$((PASS+1))
+              else
+                echo "    ✗ $file_inside  NOT accessible"; FAIL=$((FAIL+1))
+              fi
+            else
+              echo "  ✗ $dir_link  ← NOT a symlink"; FAIL=$((FAIL+1))
+            fi
+          }
+
           # zsh
           check_link "$HOME/.zshrc"
           check_link "$HOME/.zshenv"
-          # git
+          # git: stow folds ~/.config/git → dotfiles dir symlink
+          check_dir_link_and_file "$HOME/.config/git" "$HOME/.config/git/ignore"
           check_link "$HOME/.gitconfig"
-          check_link "$HOME/.config/git/ignore"
           # tmux
           check_link "$HOME/.tmux.conf"
-          # starship
+          # starship (file symlink — starship.toml is directly at .config level)
           check_link "$HOME/.config/starship.toml"
-          # ghostty
-          check_link "$HOME/.config/ghostty/config"
+          # ghostty: stow folds ~/.config/ghostty → dotfiles dir symlink
+          check_dir_link_and_file "$HOME/.config/ghostty" "$HOME/.config/ghostty/config"
           # ssh (--no-folding)
           check_link "$HOME/.ssh/config"
           # claude (--no-folding)
