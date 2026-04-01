@@ -173,10 +173,11 @@ jobs:
       # ─── Assertion 6: VS Code CLI + extensions ──────────────────────────────
       - name: Assert - VS Code CLI and extensions
         run: |
-          # Homebrew cask creates a symlink at /usr/local/bin/code
-          # and also at /opt/homebrew/bin/code on ARM
-          export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+          # setup_vscode_cli puts `code` in /usr/local/bin or ~/.local/bin
+          # Add both + the raw app bundle bin as fallback
+          export PATH="$PATH:$HOME/.local/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
+          echo "  code path: $(command -v code || echo 'NOT FOUND')"
           echo "  VS Code: $(code --version | head -1)"
           INSTALLED=$(code --list-extensions 2>/dev/null)
 

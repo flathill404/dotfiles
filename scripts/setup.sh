@@ -86,6 +86,24 @@ prepare_directories() {
 
 # ── Step 5: Stow Configs ────────────────────────────────────────────────────
 
+# Back up any non-symlink files that would conflict with stow.
+# This lets setup.sh run safely on machines that already have dotfiles.
+# Backed-up files get a .dotfiles.bak suffix; nothing is silently deleted.
+backup_stow_conflicts() {
+  local pkg="$1"
+  local target="${2:-$HOME}"
+  local pkg_dir="$DOTFILES_DIR/$pkg"
+
+  find "$pkg_dir" -type f | while IFS= read -r src; do
+    local rel="${src#${pkg_dir}/}"
+    local dest="$target/$rel"
+    if [[ -e "$dest" && ! -L "$dest" ]]; then
+      warn "Backing up conflicting file: $dest → ${dest}.dotfiles.bak"
+      mv "$dest" "${dest}.dotfiles.bak"
+    fi
+  done
+}
+
 stow_configs() {
   local packages=(zsh git tmux starship ghostty brew proto)
   cd "$DOTFILES_DIR" || return 1
@@ -93,26 +111,27 @@ stow_configs() {
   for pkg in "${packages[@]}"; do
     if [[ -d "$pkg" ]]; then
       info "Stowing $pkg..."
-      stow --restow "$pkg" 2>/dev/null || warn "Failed to stow $pkg (check for conflicting files)"
+      backup_stow_conflicts "$pkg"
+      stow --restow "$pkg" || warn "Failed to stow $pkg"
     fi
   done
 
   # SSH needs --no-folding to coexist with keys and known_hosts
   info "Stowing ssh..."
-  stow --restow --no-folding ssh 2>/dev/null \
-    || warn "Failed to stow ssh (check for conflicting files)"
+  backup_stow_conflicts "ssh"
+  stow --restow --no-folding ssh || warn "Failed to stow ssh"
 
   # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
   info "Stowing claude..."
-  stow --restow --no-folding claude 2>/dev/null \
-    || warn "Failed to stow claude (check for conflicting files)"
+  backup_stow_conflicts "claude"
+  stow --restow --no-folding claude || warn "Failed to stow claude"
 
   # VSCode requires a custom target directory
   local vscode_target="$HOME/Library/Application Support/Code/User"
   mkdir -p "$vscode_target"
   info "Stowing vscode..."
-  stow --restow --target="$vscode_target" vscode 2>/dev/null \
-    || warn "Failed to stow vscode (check for conflicting files)"
+  backup_stow_conflicts "vscode" "$vscode_target"
+  stow --restow --target="$vscode_target" vscode || warn "Failed to stow vscode"
 }
 
 # ── Step 6: SSH Key Generation ──────────────────────────────────────────────
@@ -156,6 +175,33 @@ setup_proto() {
   proto install node latest
   proto install pnpm latest
   proto install python latest
+}
+
+# ── Step 7.5: VS Code CLI ───────────────────────────────────────────────────
+
+# brew install --cask visual-studio-code places the app bundle in /Applications
+# but does NOT automatically create the `code` shell command.
+# This mirrors what VS Code's built-in "Install 'code' command in PATH" does.
+setup_vscode_cli() {
+  if command -v code &>/dev/null; then
+    success "VS Code 'code' command already available"
+    return 0
+  fi
+
+  local code_bin="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+  if [[ ! -f "$code_bin" ]]; then
+    warn "VS Code app not found — skipping 'code' CLI setup"
+    return 0
+  fi
+
+  # Prefer /usr/local/bin (always in system PATH); fall back to ~/.local/bin
+  if [[ -w /usr/local/bin ]]; then
+    ln -sf "$code_bin" /usr/local/bin/code
+    success "'code' command installed at /usr/local/bin/code"
+  else
+    ln -sf "$code_bin" "$HOME/.local/bin/code"
+    success "'code' command installed at $HOME/.local/bin/code"
+  fi
 }
 
 # ── Step 8: VSCode Extensions ───────────────────────────────────────────────
@@ -238,6 +284,7 @@ main() {
   run_step "Stow config files"           stow_configs
   run_step "SSH key generation"          generate_ssh_key
   run_step "Proto + languages"           setup_proto
+  run_step "VS Code CLI setup"           setup_vscode_cli
   run_step "VSCode extensions"           install_vscode_extensions
   run_step "Default shell (zsh)"         set_default_shell
   run_step "GPG agent configuration"     configure_gpg
