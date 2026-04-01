@@ -63,7 +63,7 @@ install_homebrew() {
 # ── Step 3: Brew Bundle ─────────────────────────────────────────────────────
 
 install_brew_packages() {
-  brew bundle --file="$BREWFILE" --no-lock
+  brew bundle --file="$BREWFILE"
 }
 
 # ── Step 4: Prepare directories ─────────────────────────────────────────────
