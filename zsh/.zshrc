@@ -6,13 +6,26 @@ setopt HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS \
        HIST_VERIFY HIST_NO_STORE HIST_EXPIRE_DUPS_FIRST \
        APPEND_HISTORY SHARE_HISTORY
 
-# Prevent secrets from being saved to history file
+# Prevent secrets from being saved to history file.
+# Returns 2 → save to in-memory history but NOT to $HISTFILE.
 zshaddhistory() {
   local line="${1%%$'\n'}"
-  [[ "$line" != *"API_KEY"* && "$line" != *"SECRET"* && \
-     "$line" != *"TOKEN"* && "$line" != *"PASSWORD"* && \
-     "$line" != *"aws_secret"* && "$line" != *"Bearer "* ]] && return 0
-  return 2  # save to internal history but NOT to HISTFILE
+  local lower="${line:l}"  # case-insensitive matching
+  # Generic credential patterns (case-insensitive)
+  case "$lower" in
+    *api_key*|*apikey*|*secret*|*token*|*password*|*passwd*|*aws_secret*) return 2 ;;
+    *"bearer "*|*"authorization: "*) return 2 ;;
+    *" -p"[!-]*|*"--password="*) return 2 ;;  # mysql/postgres inline passwords
+  esac
+  # Provider-specific token prefixes (case-sensitive — these are exact)
+  case "$line" in
+    *ghp_*|*gho_*|*ghu_*|*ghs_*|*ghr_*|*github_pat_*) return 2 ;;  # GitHub
+    *sk-ant-*|*sk-proj-*|*sk-*) return 2 ;;                         # Anthropic / OpenAI
+    *xox[abposr]-*) return 2 ;;                                     # Slack
+    *AKIA[0-9A-Z][0-9A-Z]*) return 2 ;;                             # AWS access key
+    *AIza[0-9A-Za-z_-]*) return 2 ;;                                # Google API key
+  esac
+  return 0
 }
 
 # ── Options ──────────────────────────────────────────────────────────────────
@@ -36,11 +49,19 @@ zstyle ':completion:*' cache-path "${XDG_CACHE_HOME}/zsh/zcompcache"
 zstyle ':completion:*:descriptions' format '%F{green}-- %d --%f'
 zstyle ':completion:*:warnings' format '%F{red}-- no matches --%f'
 
-# ── Plugins (via Homebrew — hardcoded path for performance) ──────────────────
-[[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
-  && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-[[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
-  && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# ── Plugins (Homebrew on macOS, apt on Linux) ────────────────────────────────
+# zsh-syntax-highlighting must be sourced AFTER autosuggestions
+for _plugin in \
+  /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+  /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh; do
+  [[ -f $_plugin ]] && source $_plugin && break
+done
+for _plugin in \
+  /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+  /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh; do
+  [[ -f $_plugin ]] && source $_plugin && break
+done
+unset _plugin
 
 # ── Key Bindings ─────────────────────────────────────────────────────────────
 bindkey -e
@@ -64,9 +85,19 @@ else
   alias l='ls -A'
 fi
 
-if (( $+commands[bat] )); then
-  alias cat='bat --paging=never'
-  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+# Debian/Ubuntu rename bat → batcat, fd → fdfind. Bridge to the canonical names.
+if (( ! $+commands[bat] )) && (( $+commands[batcat] )); then
+  alias bat='batcat'
+fi
+if (( ! $+commands[fd] )) && (( $+commands[fdfind] )); then
+  alias fd='fdfind'
+fi
+
+if (( $+commands[bat] )) || (( $+commands[batcat] )); then
+  local _bat="${commands[bat]:-${commands[batcat]}}"
+  alias cat="$_bat --paging=never"
+  export MANPAGER="sh -c 'col -bx | $_bat -l man -p'"
+  unset _bat
 fi
 
 alias grep='grep --color=auto'
@@ -103,24 +134,25 @@ buf() {
 # Extract any archive
 extract() {
   case "$1" in
-    *.tar.bz2) tar xjf "$1" ;;
-    *.tar.gz)  tar xzf "$1" ;;
-    *.tar.xz)  tar xJf "$1" ;;
-    *.bz2)     bunzip2 "$1" ;;
-    *.gz)      gunzip "$1" ;;
-    *.tar)     tar xf "$1" ;;
-    *.tbz2)    tar xjf "$1" ;;
-    *.tgz)     tar xzf "$1" ;;
-    *.zip)     unzip "$1" ;;
-    *.7z)      7z x "$1" ;;
-    *.zst)     zstd -d "$1" ;;
-    *)         echo "Unknown archive: $1" ;;
+    *.tar.bz2|*.tbz2) tar xjf "$1" ;;
+    *.tar.gz|*.tgz)   tar xzf "$1" ;;
+    *.tar.xz|*.txz)   tar xJf "$1" ;;
+    *.tar.zst)        tar --use-compress-program=unzstd -xf "$1" ;;
+    *.tar)            tar xf "$1" ;;
+    *.bz2)            bunzip2 "$1" ;;
+    *.gz)             gunzip "$1" ;;
+    *.xz)             unxz "$1" ;;
+    *.zst)            zstd -d "$1" ;;
+    *.zip)            unzip "$1" ;;
+    *.rar)            unrar x "$1" ;;
+    *.7z)             7z x "$1" ;;
+    *)                echo "Unknown archive: $1" ;;
   esac
 }
 
-# Get public IP address
+# Get public IP address (HTTPS-only, no redirect-followed plaintext fallback)
 myip() {
-  curl -s http://myip.dnsomatic.com/ || curl -s http://checkip.dyndns.com/ | grep -Eo '[0-9.]+'
+  curl -fsS https://api.ipify.org || curl -fsS https://ifconfig.me
 }
 
 # Quick port lookup

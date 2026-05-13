@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-# One-command setup for macOS (Apple Silicon).
+# One-command setup for macOS (Apple Silicon) and Linux/WSL.
 # Safe to run multiple times — each step is idempotent.
+#
+# Failure policy: `set -e` is intentionally NOT used. Individual steps may
+# fail (e.g. macOS-only commands on Linux, missing optional tools) — we log
+# the failure via `run_step` and continue. Use `set -e` inside individual
+# helpers if you need fail-fast semantics within that helper.
 
 set -uo pipefail
 
@@ -8,12 +13,30 @@ DOTFILES_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BREWFILE="$DOTFILES_DIR/brew/.Brewfile"
 EXTENSIONS_FILE="$DOTFILES_DIR/vscode/extensions.json"
 
+# ── OS detection ─────────────────────────────────────────────────────────────
+
+OS="unknown"
+case "$(uname)" in
+  Darwin) OS="macos" ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      OS="wsl"
+    else
+      OS="linux"
+    fi
+    ;;
+esac
+
+is_macos() { [[ "$OS" == "macos" ]]; }
+is_linux() { [[ "$OS" == "linux" || "$OS" == "wsl" ]]; }
+
 # ── Logging helpers ──────────────────────────────────────────────────────────
 
 info()    { printf '\033[34m[INFO]\033[0m  %s\n' "$1"; }
 success() { printf '\033[32m[  OK]\033[0m  %s\n' "$1"; }
 warn()    { printf '\033[33m[WARN]\033[0m  %s\n' "$1"; }
 fail()    { printf '\033[31m[FAIL]\033[0m  %s\n' "$1"; }
+skip()    { printf '\033[37m[SKIP]\033[0m  %s\n' "$1"; }
 
 run_step() {
   local description="$1"; shift
@@ -28,30 +51,48 @@ run_step() {
 # ── Pre-flight ───────────────────────────────────────────────────────────────
 
 preflight() {
-  if [[ "$(uname)" != "Darwin" ]]; then
-    fail "This script only supports macOS."; exit 1
-  fi
-  if [[ "$(uname -m)" != "arm64" ]]; then
-    fail "This script only supports Apple Silicon Macs."; exit 1
-  fi
-  success "Apple Silicon Mac detected"
+  case "$OS" in
+    macos)
+      if [[ "$(uname -m)" != "arm64" ]]; then
+        fail "macOS Intel is not supported (Apple Silicon only)."; exit 1
+      fi
+      success "macOS Apple Silicon detected"
+      ;;
+    linux|wsl)
+      success "Linux ($OS) detected — macOS-specific steps will be skipped"
+      ;;
+    *)
+      fail "Unsupported OS: $(uname)"; exit 1
+      ;;
+  esac
 }
 
-# ── Step 1: Xcode Command Line Tools ────────────────────────────────────────
+# ── Step 1: Xcode Command Line Tools (macOS only) ───────────────────────────
 
 install_xcode_cli() {
+  if ! is_macos; then skip "Xcode CLI (macOS only)"; return 0; fi
   if xcode-select -p &>/dev/null; then
     success "Xcode CLI tools already installed"
     return 0
   fi
   info "Installing Xcode CLI tools (a dialog may appear)..."
   xcode-select --install
-  until xcode-select -p &>/dev/null; do sleep 5; done
+  # Wait up to 30 minutes for installation; fail loudly if it stalls.
+  local waited=0
+  while ! xcode-select -p &>/dev/null; do
+    sleep 5
+    waited=$((waited + 5))
+    if (( waited > 1800 )); then
+      fail "Xcode CLI install timed out after 30 minutes"
+      return 1
+    fi
+  done
 }
 
-# ── Step 2: Homebrew ────────────────────────────────────────────────────────
+# ── Step 2: Package manager (Homebrew on macOS, apt on Linux) ───────────────
 
 install_homebrew() {
+  if ! is_macos; then skip "Homebrew (macOS only)"; return 0; fi
   if command -v brew &>/dev/null; then
     success "Homebrew already installed"
     return 0
@@ -60,15 +101,54 @@ install_homebrew() {
   eval "$(/opt/homebrew/bin/brew shellenv)"
 }
 
-# ── Step 3: Brew Bundle ─────────────────────────────────────────────────────
-
 install_brew_packages() {
+  if ! is_macos; then skip "Brew bundle (macOS only)"; return 0; fi
   brew bundle --file="$BREWFILE"
 }
 
-# ── Step 3.5: GitHub CLI Auth ───────────────────────────────────────────────
+# Linux equivalents for the cli tools that Brewfile installs.
+# Cask-only packages (Ghostty, VS Code, Chrome) are skipped — install
+# those manually for your distro.
+install_linux_packages() {
+  if ! is_linux; then skip "apt packages (Linux only)"; return 0; fi
+  if ! command -v apt-get &>/dev/null; then
+    warn "Non-Debian Linux — install equivalents of brew/.Brewfile manually"
+    return 0
+  fi
+  local pkgs=(
+    git git-lfs gnupg jq stow tmux tree wget curl
+    zsh zsh-autosuggestions zsh-syntax-highlighting
+    bat fd-find ripgrep
+    direnv
+    # Optional / may be unavailable on older distros:
+    # eza, dust, duf, btop, xh, lazygit, lazydocker, git-delta, starship
+  )
+  sudo apt-get update -qq
+  sudo apt-get install -y --no-install-recommends "${pkgs[@]}" || \
+    warn "Some apt packages failed — continuing"
+
+  # gh (GitHub CLI) — needs upstream repo on older Debian/Ubuntu
+  if ! command -v gh &>/dev/null; then
+    info "Installing gh from GitHub apt repo..."
+    (
+      type -p curl >/dev/null && \
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+      sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null && \
+      sudo apt-get update -qq && sudo apt-get install -y gh
+    ) || warn "gh install failed — install manually"
+  fi
+}
+
+# ── Step 3: GitHub CLI Auth ─────────────────────────────────────────────────
 
 setup_gh_auth() {
+  if ! command -v gh &>/dev/null; then
+    warn "gh not installed — skipping auth"
+    return 0
+  fi
   if gh auth status &>/dev/null; then
     success "GitHub CLI already authenticated"
     return 0
@@ -79,13 +159,47 @@ setup_gh_auth() {
 
 # ── Step 4: Prepare directories ─────────────────────────────────────────────
 
+# Convert a stray symlink at $1 (pointing into our dotfiles repo) back
+# into a real directory. This recovers from past stow-folding incidents
+# where, e.g., ~/.config got folded into dotfiles/git/.config.
+unfold_symlink_dir() {
+  local path="$1"
+  [[ ! -L "$path" ]] && return 0
+  local target
+  target="$(readlink -f "$path" 2>/dev/null || true)"
+  if [[ -z "$target" || "$target" != "$DOTFILES_DIR"* ]]; then
+    return 0  # symlink doesn't point into our repo — leave it alone
+  fi
+  warn "Detected folded symlink: $path → $target (un-folding to a real directory)"
+  local tmp
+  tmp="$(mktemp -d "${path}.unfold.XXXXXX")"
+  # Copy the resolved contents (skip pseudo-entries)
+  if [[ -d "$target" ]]; then
+    (cd "$target" && find . -mindepth 1 -maxdepth 1 -print0 \
+      | xargs -0 -I{} cp -a {} "$tmp/")
+  fi
+  rm "$path"
+  mv "$tmp" "$path"
+  success "Un-folded: $path is now a real directory"
+}
+
 prepare_directories() {
   # XDG directories
-  mkdir -p "$HOME/.config"
   mkdir -p "$HOME/.local/share"
   mkdir -p "$HOME/.local/state/zsh"
   mkdir -p "$HOME/.cache/zsh"
   mkdir -p "$HOME/.local/bin"
+
+  # ~/.config must be a REAL directory before any stow runs, otherwise
+  # stow may fold the entire ~/.config tree into our repo.
+  unfold_symlink_dir "$HOME/.config"
+  mkdir -p "$HOME/.config"
+
+  # Pre-create per-tool .config subdirectories so stow links files, not folders
+  mkdir -p "$HOME/.config/git"
+  mkdir -p "$HOME/.config/ghostty"
+  mkdir -p "$HOME/.config/karabiner"
+  mkdir -p "$HOME/.config/starship"  # not strictly needed but consistent
 
   # SSH directory (must exist before stow)
   mkdir -p "$HOME/.ssh"
@@ -93,9 +207,6 @@ prepare_directories() {
 
   # Claude directory (must exist before stow --no-folding)
   mkdir -p "$HOME/.claude"
-
-  # Karabiner directory (must exist before stow --no-folding)
-  mkdir -p "$HOME/.config/karabiner"
 }
 
 # ── Step 5: Stow Configs ────────────────────────────────────────────────────
@@ -115,14 +226,10 @@ backup_stow_conflicts() {
     local rel="${src#${pkg_dir}/}"
     local dest="$target/$rel"
     if [[ -e "$dest" && ! -L "$dest" ]]; then
-      # Check if the real path of $dest lives inside our dotfiles directory.
-      # This happens when an ancestor directory is already a stow symlink
-      # pointing back into DOTFILES_DIR (e.g. ~/.config/git → dotfiles/git/.config/git).
       local real_dest
       real_dest=$(realpath "$dest" 2>/dev/null || echo "")
       if [[ -n "$real_dest" && "$real_dest" == "$DOTFILES_DIR"* ]]; then
-        # Already owned by our dotfiles — do not touch it.
-        continue
+        continue  # already owned by our dotfiles
       fi
       warn "Backing up conflicting file: $dest → ${dest}.dotfiles.bak"
       mv "$dest" "${dest}.dotfiles.bak"
@@ -130,48 +237,38 @@ backup_stow_conflicts() {
   done
 }
 
+# Wrapper around `stow --restow` that always uses --no-folding for packages
+# that target a shared directory (~/.config, ~/.ssh, ~/.claude). This
+# guarantees stow creates leaf-file symlinks, never folder symlinks — so
+# tools cannot accidentally write into our repo via a folded ancestor.
+stow_pkg() {
+  local pkg="$1"
+  local target="${2:-$HOME}"
+  local extra_opts="${3:-}"
+  [[ ! -d "$DOTFILES_DIR/$pkg" ]] && return 0
+  info "Stowing $pkg..."
+  backup_stow_conflicts "$pkg" "$target"
+  # shellcheck disable=SC2086 # extra_opts is intentionally word-split
+  if ! stow --restow --no-folding $extra_opts --target="$target" "$pkg"; then
+    warn "Failed to stow $pkg"
+  fi
+}
+
 stow_configs() {
-  local packages=(zsh git tmux starship ghostty brew proto)
   cd "$DOTFILES_DIR" || return 1
 
-  for pkg in "${packages[@]}"; do
-    if [[ -d "$pkg" ]]; then
-      info "Stowing $pkg..."
-      backup_stow_conflicts "$pkg"
-      if ! stow --restow --target="$HOME" "$pkg"; then
-        warn "Failed to stow $pkg — check for conflicting files above"
-      fi
-    fi
+  # All home-targeting packages stow with --no-folding for safety.
+  for pkg in zsh git tmux starship ghostty brew proto ssh claude karabiner; do
+    stow_pkg "$pkg"
   done
 
-  # SSH needs --no-folding to coexist with keys and known_hosts
-  info "Stowing ssh..."
-  backup_stow_conflicts "ssh"
-  if ! stow --restow --no-folding --target="$HOME" ssh; then
-    warn "Failed to stow ssh"
-  fi
-
-  # Claude needs --no-folding to coexist with auto-generated files in ~/.claude/
-  info "Stowing claude..."
-  backup_stow_conflicts "claude"
-  if ! stow --restow --no-folding --target="$HOME" claude; then
-    warn "Failed to stow claude"
-  fi
-
-  # Karabiner needs --no-folding to coexist with automatic_backups/ in ~/.config/karabiner/
-  info "Stowing karabiner..."
-  backup_stow_conflicts "karabiner"
-  if ! stow --restow --no-folding --target="$HOME" karabiner; then
-    warn "Failed to stow karabiner"
-  fi
-
-  # VSCode requires a custom target directory
-  local vscode_target="$HOME/Library/Application Support/Code/User"
-  mkdir -p "$vscode_target"
-  info "Stowing vscode..."
-  backup_stow_conflicts "vscode" "$vscode_target"
-  if ! stow --restow --target="$vscode_target" vscode; then
-    warn "Failed to stow vscode"
+  # VSCode targets ~/Library/Application Support/Code/User (macOS only)
+  if is_macos; then
+    local vscode_target="$HOME/Library/Application Support/Code/User"
+    mkdir -p "$vscode_target"
+    stow_pkg vscode "$vscode_target"
+  else
+    skip "vscode stow (macOS Library path)"
   fi
 }
 
@@ -202,8 +299,8 @@ register_ssh_key() {
     return 0
   fi
 
-  if ! gh auth status &>/dev/null; then
-    warn "gh not authenticated — skipping SSH key registration"
+  if ! command -v gh &>/dev/null || ! gh auth status &>/dev/null; then
+    warn "gh not available/authenticated — skipping SSH key registration"
     return 0
   fi
 
@@ -238,12 +335,10 @@ setup_proto() {
   proto install python latest
 }
 
-# ── Step 7.5: VS Code CLI ───────────────────────────────────────────────────
+# ── Step 7.5: VS Code CLI (macOS only) ──────────────────────────────────────
 
-# brew install --cask visual-studio-code places the app bundle in /Applications
-# but does NOT automatically create the `code` shell command.
-# This mirrors what VS Code's built-in "Install 'code' command in PATH" does.
 setup_vscode_cli() {
+  if ! is_macos; then skip "VS Code CLI symlink (macOS only)"; return 0; fi
   if command -v code &>/dev/null; then
     success "VS Code 'code' command already available"
     return 0
@@ -255,7 +350,6 @@ setup_vscode_cli() {
     return 0
   fi
 
-  # Prefer /usr/local/bin (always in system PATH); fall back to ~/.local/bin
   if [[ -w /usr/local/bin ]]; then
     ln -sf "$code_bin" /usr/local/bin/code
     success "'code' command installed at /usr/local/bin/code"
@@ -270,7 +364,6 @@ setup_vscode_cli() {
 install_vscode_extensions() {
   if ! command -v code &>/dev/null; then
     warn "VS Code 'code' command not found — skipping extensions"
-    warn "Open VS Code and run 'Shell Command: Install code command in PATH' first"
     return 0
   fi
 
@@ -288,46 +381,33 @@ install_vscode_extensions() {
 # ── Step 9: Default Shell ───────────────────────────────────────────────────
 
 set_default_shell() {
-  if [[ "$SHELL" == "/bin/zsh" ]]; then
+  local zsh_path
+  zsh_path="$(command -v zsh || echo "")"
+  if [[ -z "$zsh_path" ]]; then
+    warn "zsh not installed — skipping shell change"
+    return 0
+  fi
+  if [[ "$SHELL" == "$zsh_path" || "${SHELL##*/}" == "zsh" ]]; then
     success "Default shell is already zsh"
     return 0
   fi
-  # chsh requires interactive password auth; skip silently in non-interactive
-  # environments (CI runners, sudo-less sessions).
-  if ! chsh -s /bin/zsh 2>/dev/null; then
+  if ! chsh -s "$zsh_path" 2>/dev/null; then
     warn "Could not change default shell to zsh (password required or non-interactive)"
-    warn "Run manually: chsh -s /bin/zsh"
+    warn "Run manually: chsh -s $zsh_path"
     return 0
   fi
   success "Default shell changed to zsh"
 }
 
-# ── Step 10a: GPG Key Import ────────────────────────────────────────────────
-
-import_gpg_key() {
-  local encrypted_key="$DOTFILES_DIR/gnupg/private-key.gpg.asc"
-
-  if [[ ! -f "$encrypted_key" ]]; then
-    warn "No encrypted GPG key found at gnupg/private-key.gpg.asc — skipping"
-    return 0
-  fi
-
-  # Idempotent: skip if a secret key is already in the keyring
-  if gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep -q "^sec"; then
-    success "GPG secret key already in keyring"
-    return 0
-  fi
-
-  info "Enter the passphrase used to encrypt gnupg/private-key.gpg.asc:"
-  if gpg --decrypt "$encrypted_key" 2>/dev/null | gpg --import; then
-    success "GPG private key imported successfully"
-  else
-    warn "GPG key import failed — import manually: gpg --import <key>"
-    return 1
-  fi
-}
-
-# ── Step 10b: GPG Agent (pinentry-mac) ──────────────────────────────────────
+# ── Step 10: GPG Agent (pinentry) ───────────────────────────────────────────
+#
+# GPG private key management is intentionally manual:
+#   1. Generate a key on this machine, OR import one securely
+#      (1Password / Keychain / scp from a trusted host).
+#   2. Add `signingkey = <full-fingerprint>` to ~/.gitconfig.local.
+#   3. Register the public key on GitHub via `gh gpg-key add`.
+#
+# We DO NOT store private keys (encrypted or otherwise) in this public repo.
 
 configure_gpg() {
   local gpg_dir="$HOME/.gnupg"
@@ -335,41 +415,24 @@ configure_gpg() {
   chmod 700 "$gpg_dir"
 
   local agent_conf="$gpg_dir/gpg-agent.conf"
-  local pinentry_path="/opt/homebrew/bin/pinentry-mac"
+  local pinentry_path=""
 
-  if [[ -f "$pinentry_path" ]]; then
+  if is_macos && [[ -f "/opt/homebrew/bin/pinentry-mac" ]]; then
+    pinentry_path="/opt/homebrew/bin/pinentry-mac"
+  elif is_linux && command -v pinentry-curses &>/dev/null; then
+    pinentry_path="$(command -v pinentry-curses)"
+  fi
+
+  if [[ -n "$pinentry_path" ]]; then
     if ! grep -q "pinentry-program" "$agent_conf" 2>/dev/null; then
       echo "pinentry-program $pinentry_path" >> "$agent_conf"
-      success "Configured pinentry-mac for GPG"
+      success "Configured pinentry: $pinentry_path"
     else
       success "GPG pinentry already configured"
     fi
+  else
+    warn "No pinentry binary found — install pinentry-mac (macOS) or pinentry-curses (Linux)"
   fi
-}
-
-# ── Step 10c: Register GPG Key on GitHub ────────────────────────────────────
-
-register_gpg_key() {
-  if ! gh auth status &>/dev/null; then
-    warn "gh not authenticated — skipping GPG key registration"
-    return 0
-  fi
-
-  local key_id
-  key_id="$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null \
-    | awk '/^sec/{split($2,a,"/"); print a[2]; exit}')"
-
-  if [[ -z "$key_id" ]]; then
-    warn "No GPG secret key found — skipping GitHub registration"
-    return 0
-  fi
-
-  if gh gpg-key list 2>/dev/null | grep -qF "$key_id"; then
-    success "GPG key already registered on GitHub"
-    return 0
-  fi
-
-  gpg --export --armor "$key_id" | gh gpg-key add - --title "$(hostname -s)"
 }
 
 # ── Step 11: Fix Permissions ────────────────────────────────────────────────
@@ -378,15 +441,17 @@ fix_permissions() {
   "$DOTFILES_DIR/scripts/fix-permissions.sh"
 }
 
-# ── Step 12: macOS Hardening ────────────────────────────────────────────────
+# ── Step 12: macOS Hardening (macOS only) ───────────────────────────────────
 
 macos_hardening() {
+  if ! is_macos; then skip "macOS hardening (macOS only)"; return 0; fi
   "$DOTFILES_DIR/scripts/macos-hardening.sh"
 }
 
-# ── Step 13: macOS Speedup ───────────────────────────────────────────────────
+# ── Step 13: macOS Speedup (macOS only) ─────────────────────────────────────
 
 macos_speedup() {
+  if ! is_macos; then skip "macOS speedup (macOS only)"; return 0; fi
   "$DOTFILES_DIR/scripts/macos-speedup.sh"
 }
 
@@ -404,6 +469,7 @@ main() {
   run_step "Xcode Command Line Tools"   install_xcode_cli
   run_step "Homebrew"                    install_homebrew
   run_step "Brew packages & casks"       install_brew_packages
+  run_step "apt packages (Linux)"        install_linux_packages
   run_step "GitHub CLI auth"             setup_gh_auth
   run_step "Prepare directories"         prepare_directories
   run_step "Stow config files"           stow_configs
@@ -413,23 +479,25 @@ main() {
   run_step "VS Code CLI setup"           setup_vscode_cli
   run_step "VSCode extensions"           install_vscode_extensions
   run_step "Default shell (zsh)"         set_default_shell
-  run_step "GPG key import"              import_gpg_key
   run_step "GPG agent configuration"     configure_gpg
-  run_step "Register GPG key on GitHub"  register_gpg_key
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
   run_step "macOS performance tuning"    macos_speedup
-  # Re-stow after all installs: brew/git/gh may have created real files at the
-  # symlink targets (e.g. ~/.config/git/ignore, VS Code extensions.json).
-  # A second pass backs those up and replaces them with our dotfiles symlinks.
+  # Second pass: catches files that step 3 (package install) may have created
+  # at stow target paths (e.g. ~/.config/git/ignore via apt git package).
   run_step "Re-stow config files"        stow_configs
 
   echo ""
   success "Setup complete! Open a new terminal to apply all changes."
   echo ""
   info "Manual steps remaining:"
-  info "  1. Create ~/.gitconfig.local for machine-specific git settings"
-  info "  2. Enable FileVault in System Settings if not already on"
+  info "  1. Create ~/.gitconfig.local with your GPG signingkey:"
+  info "       [user] signingkey = <full-fingerprint>"
+  info "  2. Generate or import a GPG key (this repo does NOT ship one):"
+  info "       gpg --full-generate-key  # then: gh gpg-key add"
+  if is_macos; then
+    info "  3. Enable FileVault in System Settings if not already on"
+  fi
   echo ""
 }
 

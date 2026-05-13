@@ -1,7 +1,9 @@
 [user]
 	name = flathill404
 	email = 38638577+flathill404@users.noreply.github.com
-	signingkey = 74820924935EC3EA
+	# signingkey is per-machine — define in ~/.gitconfig.local:
+	#   [user]
+	#       signingkey = <full-fingerprint>
 
 [commit]
 	gpgsign = true
@@ -20,7 +22,6 @@
 	fsckObjects = true
 	prune = true
 	pruneTags = true
-	writeCommitGraph = true
 
 [receive]
 	fsckObjects = true

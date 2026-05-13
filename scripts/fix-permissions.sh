@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fix permissions for sensitive directories.
-# Safe to run multiple times.
+# Safe to run multiple times. OS-agnostic.
 
 set -euo pipefail
 

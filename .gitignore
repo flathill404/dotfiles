@@ -4,8 +4,23 @@
 *.local
 *.local.*
 
-# GPG — only the encrypted export is tracked; raw keys must never be committed
+# GPG — raw private keys must never be committed
 secret.gpg
-gnupg/*.key
-gnupg/*.pem
+*.key
+*.pem
 gnupg/secring*
+gnupg/private-key*
+
+# Stow folding defense: if ~/.config gets folded into dotfiles/git/.config,
+# any tool that writes to ~/.config/<x> will physically end up here.
+# Only allow our tracked git/ subdirectory; everything else is fenced off.
+git/.config/*
+!git/.config/git/
+
+# Same defense for other packages that own a ~/.config/* subdirectory.
+starship/.config/*
+!starship/.config/starship.toml
+ghostty/.config/*
+!ghostty/.config/ghostty/
+karabiner/.config/*
+!karabiner/.config/karabiner/

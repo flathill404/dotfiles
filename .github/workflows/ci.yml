@@ -23,12 +23,14 @@ jobs:
       - name: Install ShellCheck
         run: sudo apt-get install -y --no-install-recommends shellcheck
 
-      - name: Lint shell scripts
+      - name: Lint all shell scripts
         run: |
           echo "=== ShellCheck ==="
-          shellcheck --severity=warning scripts/setup.sh
-          shellcheck --severity=warning scripts/fix-permissions.sh
-          shellcheck --severity=warning scripts/macos-hardening.sh
+          # Lint every executable bash script under scripts/
+          find scripts -maxdepth 1 -type f -name '*.sh' | sort | while IFS= read -r f; do
+            echo "  Linting: $f"
+            shellcheck --severity=warning "$f"
+          done
 
   # ─────────────────────────────────────────────
   # 2. Config file syntax validation
@@ -54,9 +56,8 @@ jobs:
       - name: Validate TOML files
         run: |
           echo "=== TOML validation ==="
-          # tomllib is stdlib since Python 3.11; fall back to tomli on older versions
           VALIDATE_TOML='
-          import sys, pathlib
+          import sys
           try:
               import tomllib
           except ImportError:
@@ -68,7 +69,6 @@ jobs:
                   tomllib.load(fh)
               print(f"  OK: {path}")
           '
-          # Find .toml files
           mapfile -t toml_files < <(find . -name '*.toml' ! -path './.git/*' | sort)
           # Also validate .prototools (TOML format but no .toml extension)
           python3 -c "$VALIDATE_TOML" "${toml_files[@]}" proto/.prototools
@@ -86,7 +86,40 @@ jobs:
           echo "  OK"
 
   # ─────────────────────────────────────────────
-  # 3. GNU Stow dry-run (conflict detection)
+  # 3. Secret-scanning guard (prevent regression)
+  # ─────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Refuse private-key files in working tree
+        run: |
+          echo "=== Forbidden file patterns ==="
+          BAD=$(find . \
+            -path ./.git -prune -o \
+            -type f \( \
+              -name 'private-key*' -o \
+              -name 'id_rsa' -o -name 'id_ed25519' -o -name 'id_ecdsa' -o \
+              -name '*.pem' -o -name '*.key' -o -name 'secret.gpg' \
+            \) -print)
+          if [ -n "$BAD" ]; then
+            echo "ERROR: Forbidden secret-like files present:"
+            echo "$BAD"
+            exit 1
+          fi
+          echo "OK: no secret-like files in working tree"
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────
+  # 4. GNU Stow dry-run (conflict detection)
   # ─────────────────────────────────────────────
   stow-simulate:
     name: Stow Dry-Run
@@ -97,31 +130,23 @@ jobs:
       - name: Install GNU Stow
         run: sudo apt-get install -y --no-install-recommends stow
 
-      - name: Simulate stow for all packages
+      - name: Simulate stow (all home-targeting packages, --no-folding)
         run: |
-          # Use a temp dir as target to avoid conflicts with runner's home
           STOW_TARGET=$(mktemp -d)
+          # Pre-create real ~/.config subdirs (matches setup.sh prepare_directories)
+          mkdir -p "$STOW_TARGET/.config"/{git,ghostty,karabiner,starship}
           echo "Target: $STOW_TARGET"
 
-          echo "=== Standard packages ==="
-          for pkg in zsh git tmux starship ghostty brew proto; do
-            echo "  Simulating: $pkg"
-            stow --simulate --target="$STOW_TARGET" "$pkg"
-            echo "  OK"
-          done
-
-          echo "=== No-folding packages (ssh, claude) ==="
-          for pkg in ssh claude; do
+          for pkg in zsh git tmux starship ghostty brew proto ssh claude karabiner; do
             echo "  Simulating: $pkg"
             stow --simulate --no-folding --target="$STOW_TARGET" "$pkg"
             echo "  OK"
           done
 
-          # vscode targets ~/Library/Application Support/Code/User (macOS only)
           echo "  Skipping: vscode (macOS Library path — tested in macos-arm job)"
 
   # ─────────────────────────────────────────────
-  # 4. macOS Apple Silicon validation
+  # 5. macOS Apple Silicon validation
   # ─────────────────────────────────────────────
   macos-arm:
     name: macOS ARM64 (Apple Silicon)
@@ -141,7 +166,6 @@ jobs:
       - name: Verify Homebrew (ARM)
         run: |
           brew --version
-          # Confirm Homebrew is installed at the ARM path
           test -x /opt/homebrew/bin/brew && echo "  Homebrew at /opt/homebrew (ARM) OK"
 
       - name: Validate zsh script syntax
@@ -153,16 +177,13 @@ jobs:
       - name: Validate bash script syntax
         run: |
           echo "=== bash syntax check ==="
-          bash -n scripts/setup.sh          && echo "  setup.sh OK"
-          bash -n scripts/fix-permissions.sh && echo "  fix-permissions.sh OK"
-          bash -n scripts/macos-hardening.sh && echo "  macos-hardening.sh OK"
+          for f in scripts/*.sh; do
+            bash -n "$f" && echo "  $f OK"
+          done
 
       - name: Validate Brewfile (dry-run)
         run: |
           echo "=== Brewfile dry-run ==="
-          # exit 1 is expected when packages are not installed — suppress it.
-          # The goal here is output inspection (formula names, tap correctness),
-          # not confirming everything is installed.
           brew bundle --file=brew/.Brewfile --dry-run 2>&1 | head -100 || true
           echo "=== Brewfile dry-run complete ==="
 
@@ -170,22 +191,16 @@ jobs:
         run: |
           brew install stow --quiet
           STOW_TARGET=$(mktemp -d)
+          mkdir -p "$STOW_TARGET/.config"/{git,ghostty,karabiner,starship}
 
           echo "=== Stow simulate on macOS ==="
-          for pkg in zsh git tmux starship ghostty brew proto; do
-            echo "  Simulating: $pkg"
-            stow --simulate --target="$STOW_TARGET" "$pkg"
-            echo "  OK"
-          done
-
-          for pkg in ssh claude; do
+          for pkg in zsh git tmux starship ghostty brew proto ssh claude karabiner; do
             echo "  Simulating: $pkg"
             stow --simulate --no-folding --target="$STOW_TARGET" "$pkg"
             echo "  OK"
           done
 
-          # vscode: simulate with a temp Library-like target
           VSCODE_TARGET=$(mktemp -d)
           echo "  Simulating: vscode (against temp target)"
-          stow --simulate --target="$VSCODE_TARGET" vscode
+          stow --simulate --no-folding --target="$VSCODE_TARGET" vscode
           echo "  OK"
