@@ -18,7 +18,7 @@ The setup script is idempotent and auto-detects the OS — macOS-specific steps 
 
 1. 🍎 Xcode Command Line Tools
 2. 🍎 Homebrew
-3. 🍎 Brew packages & casks (`brew/.Brewfile`) — on Linux, apt packages installed instead
+3. Packages: 🍎 Brew (`brew/.Brewfile`) / 🐧 apt (`scripts/install-linux-packages.sh`)
 4. GitHub CLI auth (`gh auth login --web`, skipped if already authenticated)
 5. Prepare XDG / SSH / Claude directories (un-folds any stray `~/.config` symlink into a real directory)
 6. Stow all config packages as symlinks (all with `--no-folding` for safety)

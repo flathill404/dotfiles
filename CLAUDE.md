@@ -18,7 +18,7 @@ Step order (macOS-only steps are skipped on Linux):
 
 1. Xcode Command Line Tools (macOS)
 2. Homebrew (macOS)
-3. Brew packages & casks (macOS) / apt packages (Linux)
+3. Brew packages & casks (macOS, from `brew/.Brewfile`) / apt packages (Linux, from `scripts/install-linux-packages.sh`)
 4. GitHub CLI auth (`gh auth login --web` — skipped if already authenticated)
 5. Prepare directories — including un-folding any stray `~/.config` symlink back into a real directory
 6. Stow config files (all packages use `--no-folding` for safety)

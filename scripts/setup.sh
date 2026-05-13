@@ -106,40 +106,11 @@ install_brew_packages() {
   brew bundle --file="$BREWFILE"
 }
 
-# Linux equivalents for the cli tools that Brewfile installs.
-# Cask-only packages (Ghostty, VS Code, Chrome) are skipped — install
-# those manually for your distro.
+# Linux package install is delegated to a dedicated script, mirroring how
+# brew/.Brewfile is a separate declarative inventory on macOS.
 install_linux_packages() {
   if ! is_linux; then skip "apt packages (Linux only)"; return 0; fi
-  if ! command -v apt-get &>/dev/null; then
-    warn "Non-Debian Linux — install equivalents of brew/.Brewfile manually"
-    return 0
-  fi
-  local pkgs=(
-    git git-lfs gnupg jq stow tmux tree wget curl
-    zsh zsh-autosuggestions zsh-syntax-highlighting
-    bat fd-find ripgrep
-    direnv
-    # Optional / may be unavailable on older distros:
-    # eza, dust, duf, btop, xh, lazygit, lazydocker, git-delta, starship
-  )
-  sudo apt-get update -qq
-  sudo apt-get install -y --no-install-recommends "${pkgs[@]}" || \
-    warn "Some apt packages failed — continuing"
-
-  # gh (GitHub CLI) — needs upstream repo on older Debian/Ubuntu
-  if ! command -v gh &>/dev/null; then
-    info "Installing gh from GitHub apt repo..."
-    (
-      type -p curl >/dev/null && \
-      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-      sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null && \
-      sudo apt-get update -qq && sudo apt-get install -y gh
-    ) || warn "gh install failed — install manually"
-  fi
+  "$DOTFILES_DIR/scripts/install-linux-packages.sh"
 }
 
 # ── Step 3: GitHub CLI Auth ─────────────────────────────────────────────────
