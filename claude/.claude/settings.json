@@ -31,8 +31,27 @@
       "Bash(brew list*)",
       "Bash(brew info*)",
       "Bash(brew search*)",
-      "Bash(proto list*)",
+
+      // proto (read-only)
+      "Bash(proto bin*)",
+      "Bash(proto debug*)",
+      "Bash(proto diagnose*)",
       "Bash(proto status*)",
+      "Bash(proto versions*)",
+
+      // moon (read-only)
+      "Bash(moon action-graph*)",
+      "Bash(moon bin*)",
+      "Bash(moon hash*)",
+      "Bash(moon project*)",
+      "Bash(moon project-graph*)",
+      "Bash(moon projects*)",
+      "Bash(moon query*)",
+      "Bash(moon task*)",
+      "Bash(moon task-graph*)",
+      "Bash(moon tasks*)",
+      "Bash(moon template*)",
+      "Bash(moon templates*)",
 
       // Docker (read-only)
       "Bash(docker ps*)",
