@@ -29,10 +29,11 @@ Step order (macOS-only steps are skipped on Linux):
 11. VS Code extensions
 12. Default shell (zsh)
 13. GPG agent configuration (pinentry-mac on macOS, pinentry-curses on Linux)
-14. Fix file permissions
-15. macOS security hardening (macOS)
-16. macOS performance tuning (macOS)
-17. Re-stow config files (second pass to replace any files created during install)
+14. Git credential helper (osxkeychain on macOS, cache on Linux/WSL — written to `~/.gitconfig.local`)
+15. Fix file permissions
+16. macOS security hardening (macOS)
+17. macOS performance tuning (macOS)
+18. Re-stow config files (second pass to replace any files created during install)
 
 GPG private keys are NOT shipped in this repo. Import manually via `scripts/gpg-import.sh /path/to/secret.gpg` after retrieving the encrypted key from your private storage.
 
@@ -55,7 +56,7 @@ stow --restow --no-folding --target="$HOME/Library/Application Support/Code/User
 - `.gitignore` includes a defensive fence around `git/.config/*`, `starship/.config/*`, `ghostty/.config/*`, `karabiner/.config/*` — only tracked tool subdirs are allowed; anything else accidentally written into the repo is ignored
 - `.gitignore` excludes `.env`, `.env.*`, `.envrc`, `*.local`, `*.local.*`, `*.pem`, `*.key`, `secret.gpg`, `private-key*`
 - Global gitignore at `git/.config/git/ignore` blocks secrets (keys, credentials, .env files) from any repo
-- Git config includes `~/.gitconfig.local` for per-machine settings — the GPG `signingkey` MUST live there, never in the tracked `.gitconfig`
+- Git config includes `~/.gitconfig.local` for per-machine settings — the GPG `signingkey` and the OS-specific `credential.helper` MUST live there, never in the tracked `.gitconfig`
 - Proto manages Node.js, pnpm, and Python versions (see `proto/.prototools`)
 - Brew packages are declared in `brew/.Brewfile` — use `brew bundle --file=brew/.Brewfile` to sync (macOS only)
 - Shell environment setup is split: `.zshenv` (PATH, env vars loaded by all shells) vs `.zshrc` (interactive config, aliases, plugins)

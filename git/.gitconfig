@@ -12,8 +12,8 @@
 	defaultBranch = main
 
 # ── Security ─────────────────────────────────────────────────────────────────
-[credential]
-	helper = osxkeychain
+# credential.helper is OS-specific (osxkeychain on macOS, cache on Linux/WSL)
+# and is written to ~/.gitconfig.local by scripts/setup.sh.
 
 [transfer]
 	fsckObjects = true
@@ -31,7 +31,8 @@
 	fsmonitor = true
 	untrackedCache = true
 	commitGraph = true
-	pager = delta
+	# delta is optional on Linux/WSL — fall back to less if absent
+	pager = "if command -v delta >/dev/null 2>&1; then delta; else less; fi"
 	autocrlf = input
 	whitespace = fix
 
@@ -40,7 +41,7 @@
 
 # ── Delta (diff pager) ──────────────────────────────────────────────────────
 [interactive]
-	diffFilter = delta --color-only
+	diffFilter = "if command -v delta >/dev/null 2>&1; then delta --color-only; else cat; fi"
 
 [delta]
 	navigate = true
