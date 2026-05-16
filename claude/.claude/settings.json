@@ -26,6 +26,17 @@
       "Bash(pwd)",
       "Bash(which *)",
       "Bash(man *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(tree *)",
+      "Bash(file *)",
+      "Bash(stat *)",
+      "Bash(diff *)",
+      "Bash(rg *)",
+      "Bash(fd *)",
+      "Bash(echo *)",
 
       // Package managers (read-only)
       "Bash(brew list*)",
@@ -65,6 +76,33 @@
       "Bash(stow *)"
     ],
     "deny": [
+      // Destructive filesystem / disk
+      "Bash(rm -rf*)",
+      "Bash(rm -fr*)",
+      "Bash(rm -r *)",
+      "Bash(sudo rm*)",
+      "Bash(dd *)",
+      "Bash(mkfs*)",
+
+      // Recursive permission/ownership changes
+      "Bash(chmod -R*)",
+      "Bash(chown -R*)",
+      "Bash(sudo chmod*)",
+      "Bash(sudo chown*)",
+
+      // History-destroying git
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -fd*)",
+      "Bash(git clean -fdx*)",
+
+      // Pipe-to-shell remote execution
+      "Bash(curl * | sh*)",
+      "Bash(curl * | bash*)",
+      "Bash(wget * | sh*)",
+      "Bash(wget * | bash*)",
+
       // Secrets & credentials
       "Read(.env)",
       "Read(.env.*)",
