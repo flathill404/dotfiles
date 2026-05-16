@@ -406,6 +406,36 @@ configure_gpg() {
   fi
 }
 
+# ── Git credential helper (per-OS) ──────────────────────────────────────────
+#
+# osxkeychain is macOS-only; on Linux/WSL it errors on every credential
+# lookup. The helper is OS-specific, so it lives in ~/.gitconfig.local
+# (machine-local, like the GPG signingkey) rather than the tracked .gitconfig.
+
+configure_git_credential() {
+  local local_cfg="$HOME/.gitconfig.local"
+  touch "$local_cfg"
+
+  if [[ -n "$(git config --file "$local_cfg" --get credential.helper 2>/dev/null)" ]]; then
+    success "git credential helper already configured (~/.gitconfig.local)"
+    return 0
+  fi
+
+  local helper=""
+  if is_macos; then
+    helper="osxkeychain"
+  elif is_linux; then
+    helper="cache --timeout=86400"
+  fi
+
+  if [[ -n "$helper" ]]; then
+    git config --file "$local_cfg" credential.helper "$helper"
+    success "Configured git credential helper: $helper"
+  else
+    warn "Unknown OS — set credential.helper manually in ~/.gitconfig.local"
+  fi
+}
+
 # ── Step 11: Fix Permissions ────────────────────────────────────────────────
 
 fix_permissions() {
@@ -451,6 +481,7 @@ main() {
   run_step "VSCode extensions"           install_vscode_extensions
   run_step "Default shell (zsh)"         set_default_shell
   run_step "GPG agent configuration"     configure_gpg
+  run_step "Git credential helper"       configure_git_credential
   run_step "Fix file permissions"        fix_permissions
   run_step "macOS security hardening"    macos_hardening
   run_step "macOS performance tuning"    macos_speedup
