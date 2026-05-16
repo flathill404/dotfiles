@@ -29,5 +29,8 @@
       "path": "/bin/zsh"
     }
   },
-  "workbench.startupEditor": "none"
+  "workbench.startupEditor": "none",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
