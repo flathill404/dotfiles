@@ -11,6 +11,14 @@
 # ── Secrets & Credentials (defense in depth) ─────────────────────────────────
 .env
 .env.*
+# Keep committable templates visible — these are meant to be tracked
+# (onboarding files). Real secrets like .env.local stay ignored above.
+!.env.example
+!.env.sample
+!.env.template
+!.env.dist
+!.env.defaults
+!.env.*.example
 .envrc
 *.pem
 *.key
