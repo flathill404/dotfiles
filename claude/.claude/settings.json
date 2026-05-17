@@ -1,8 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
-      // Git (read-only)
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
@@ -11,8 +13,6 @@
       "Bash(git stash list*)",
       "Bash(git remote -v*)",
       "Bash(git fetch*)",
-
-      // GitHub CLI (read-only)
       "Bash(gh pr view*)",
       "Bash(gh pr list*)",
       "Bash(gh pr checks*)",
@@ -20,8 +20,6 @@
       "Bash(gh issue list*)",
       "Bash(gh repo view*)",
       "Bash(gh run view*)",
-
-      // Shell utilities (read-only)
       "Bash(ls *)",
       "Bash(pwd)",
       "Bash(which *)",
@@ -37,20 +35,14 @@
       "Bash(rg *)",
       "Bash(fd *)",
       "Bash(echo *)",
-
-      // Package managers (read-only)
       "Bash(brew list*)",
       "Bash(brew info*)",
       "Bash(brew search*)",
-
-      // proto (read-only)
       "Bash(proto bin*)",
       "Bash(proto debug*)",
       "Bash(proto diagnose*)",
       "Bash(proto status*)",
       "Bash(proto versions*)",
-
-      // moon (read-only)
       "Bash(moon action-graph*)",
       "Bash(moon bin*)",
       "Bash(moon hash*)",
@@ -63,47 +55,34 @@
       "Bash(moon tasks*)",
       "Bash(moon template*)",
       "Bash(moon templates*)",
-
-      // Docker (read-only)
       "Bash(docker ps*)",
       "Bash(docker images*)",
       "Bash(docker logs*)",
       "Bash(docker compose ps*)",
       "Bash(docker compose logs*)",
-
-      // Utilities
       "Bash(jq *)",
       "Bash(stow *)"
     ],
     "deny": [
-      // Destructive filesystem / disk
       "Bash(rm -rf*)",
       "Bash(rm -fr*)",
       "Bash(rm -r *)",
       "Bash(sudo rm*)",
       "Bash(dd *)",
       "Bash(mkfs*)",
-
-      // Recursive permission/ownership changes
       "Bash(chmod -R*)",
       "Bash(chown -R*)",
       "Bash(sudo chmod*)",
       "Bash(sudo chown*)",
-
-      // History-destroying git
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(git reset --hard*)",
       "Bash(git clean -fd*)",
       "Bash(git clean -fdx*)",
-
-      // Pipe-to-shell remote execution
       "Bash(curl * | sh*)",
       "Bash(curl * | bash*)",
       "Bash(wget * | sh*)",
       "Bash(wget * | bash*)",
-
-      // Secrets & credentials
       "Read(.env)",
       "Read(.env.*)",
       "Read(**/.env)",
@@ -114,9 +93,6 @@
       "Read(**/.npmrc)",
       "Read(**/.netrc)"
     ]
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
