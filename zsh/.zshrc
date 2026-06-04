@@ -103,22 +103,6 @@ fi
 alias grep='grep --color=auto'
 alias sl='ls'
 
-# Docker
-alias dk='docker'
-alias dkps='docker ps'
-alias dkpsa='docker ps -a'
-alias dki='docker images'
-alias dkip='docker image prune -a -f'
-alias dkvp='docker volume prune -f'
-alias dksp='docker system prune -a -f'
-alias dkex='docker exec -it'
-alias dkrit='docker run --rm -it'
-
-# Docker Compose
-alias dco='docker compose'
-alias dcol='docker compose logs -f --tail 100'
-alias dcou='docker compose up'
-
 # ── Functions ────────────────────────────────────────────────────────────────
 
 # mkdir + cd in one

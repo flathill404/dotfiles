@@ -3,38 +3,21 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "model": "claude-opus-4-8",
+  "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
   "permissions": {
     "allow": [
-      "Bash(git status*)",
-      "Bash(git log*)",
-      "Bash(git diff*)",
-      "Bash(git show*)",
-      "Bash(git branch*)",
-      "Bash(git stash list*)",
-      "Bash(git remote -v*)",
+      "Bash(grep *)",
       "Bash(git fetch*)",
-      "Bash(gh pr view*)",
-      "Bash(gh pr list*)",
-      "Bash(gh pr checks*)",
-      "Bash(gh issue view*)",
-      "Bash(gh issue list*)",
-      "Bash(gh repo view*)",
-      "Bash(gh run view*)",
-      "Bash(ls *)",
-      "Bash(pwd)",
-      "Bash(which *)",
-      "Bash(man *)",
-      "Bash(cat *)",
-      "Bash(head *)",
-      "Bash(tail *)",
-      "Bash(wc *)",
-      "Bash(tree *)",
-      "Bash(file *)",
-      "Bash(stat *)",
-      "Bash(diff *)",
-      "Bash(rg *)",
-      "Bash(fd *)",
-      "Bash(echo *)",
+      "Bash(go version)",
+      "Bash(go env)",
+      "Bash(go list *)",
+      "Bash(go doc *)",
+      "Bash(go mod graph)",
+      "Bash(go mod why*)",
+      "Bash(go mod verify)",
+      "Bash(go vet *)",
       "Bash(brew list*)",
       "Bash(brew info*)",
       "Bash(brew search*)",
@@ -55,11 +38,11 @@
       "Bash(moon tasks*)",
       "Bash(moon template*)",
       "Bash(moon templates*)",
-      "Bash(docker ps*)",
-      "Bash(docker images*)",
-      "Bash(docker logs*)",
+      "Bash(moon run :lint*)",
+      "Bash(moon run root:yaml-lint*)",
       "Bash(docker compose ps*)",
       "Bash(docker compose logs*)",
+      "Bash(docker compose config*)",
       "Bash(jq *)",
       "Bash(stow *)"
     ],
@@ -94,6 +77,9 @@
       "Read(**/.netrc)"
     ]
   },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -102,7 +88,5 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "dark",
-  "agentPushNotifEnabled": true
+  "theme": "dark"
 }
