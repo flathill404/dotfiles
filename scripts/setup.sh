@@ -260,7 +260,7 @@ generate_ssh_key() {
   success "SSH key generated"
 }
 
-# ── Step 6b: Register SSH Key on GitHub ─────────────────────────────────────
+# ── Step 7: Register SSH Key on GitHub ──────────────────────────────────────
 
 register_ssh_key() {
   local pub_key="$HOME/.ssh/id_ed25519.pub"
@@ -286,7 +286,7 @@ register_ssh_key() {
   gh ssh-key add "$pub_key" --title "$(hostname -s)" --type authentication
 }
 
-# ── Step 7: Proto + Languages ───────────────────────────────────────────────
+# ── Step 8: Proto + Languages ───────────────────────────────────────────────
 
 setup_proto() {
   if ! command -v proto &>/dev/null; then
@@ -306,7 +306,7 @@ setup_proto() {
   proto install python latest
 }
 
-# ── Step 7.5: VS Code CLI (macOS only) ──────────────────────────────────────
+# ── Step 9: VS Code CLI (macOS only) ────────────────────────────────────────
 
 setup_vscode_cli() {
   if ! is_macos; then skip "VS Code CLI symlink (macOS only)"; return 0; fi
@@ -330,7 +330,7 @@ setup_vscode_cli() {
   fi
 }
 
-# ── Step 8: VSCode Extensions ───────────────────────────────────────────────
+# ── Step 10: VSCode Extensions ──────────────────────────────────────────────
 
 install_vscode_extensions() {
   if ! command -v code &>/dev/null; then
@@ -349,7 +349,7 @@ install_vscode_extensions() {
   done
 }
 
-# ── Step 9: Default Shell ───────────────────────────────────────────────────
+# ── Step 11: Default Shell ──────────────────────────────────────────────────
 
 set_default_shell() {
   local zsh_path
@@ -370,7 +370,7 @@ set_default_shell() {
   success "Default shell changed to zsh"
 }
 
-# ── Step 10: GPG Agent (pinentry) ───────────────────────────────────────────
+# ── Step 12: GPG Agent (pinentry) ───────────────────────────────────────────
 #
 # GPG private key management is intentionally manual:
 #   1. Generate a key on this machine, OR import one securely
@@ -406,7 +406,7 @@ configure_gpg() {
   fi
 }
 
-# ── Git credential helper (per-OS) ──────────────────────────────────────────
+# ── Step 13: Git credential helper (per-OS) ─────────────────────────────────
 #
 # osxkeychain is macOS-only; on Linux/WSL it errors on every credential
 # lookup. The helper is OS-specific, so it lives in ~/.gitconfig.local
@@ -436,20 +436,20 @@ configure_git_credential() {
   fi
 }
 
-# ── Step 11: Fix Permissions ────────────────────────────────────────────────
+# ── Step 14: Fix Permissions ────────────────────────────────────────────────
 
 fix_permissions() {
   "$DOTFILES_DIR/scripts/fix-permissions.sh"
 }
 
-# ── Step 12: macOS Hardening (macOS only) ───────────────────────────────────
+# ── Step 15: macOS Hardening (macOS only) ───────────────────────────────────
 
 macos_hardening() {
   if ! is_macos; then skip "macOS hardening (macOS only)"; return 0; fi
   "$DOTFILES_DIR/scripts/macos-hardening.sh"
 }
 
-# ── Step 13: macOS Speedup (macOS only) ─────────────────────────────────────
+# ── Step 16: macOS Speedup (macOS only) ─────────────────────────────────────
 
 macos_speedup() {
   if ! is_macos; then skip "macOS speedup (macOS only)"; return 0; fi

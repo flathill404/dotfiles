@@ -29,10 +29,11 @@ The setup script is idempotent and auto-detects the OS — macOS-specific steps 
 11. VS Code extensions
 12. Default shell → zsh
 13. GPG agent (pinentry-mac on macOS, pinentry-curses on Linux)
-14. Fix file permissions (SSH, GnuPG, history)
-15. 🍎 macOS security hardening
-16. 🍎 macOS performance tuning
-17. Re-stow config files (second pass to override any files created during install)
+14. Git credential helper → `~/.gitconfig.local` (osxkeychain on macOS, cache on Linux/WSL)
+15. Fix file permissions (SSH, GnuPG, history)
+16. 🍎 macOS security hardening
+17. 🍎 macOS performance tuning
+18. Re-stow config files (second pass to override any files created during install)
 
 ## Packages
 
@@ -99,6 +100,8 @@ The `[user]` block in the tracked `.gitconfig` does NOT include `signingkey` —
 [user]
     signingkey = <full-fingerprint>
 ```
+
+The OS-specific `credential.helper` is also kept out of the tracked `.gitconfig` — `setup.sh` writes it to `~/.gitconfig.local` automatically (osxkeychain on macOS, `cache` on Linux/WSL).
 
 ## Security
 
