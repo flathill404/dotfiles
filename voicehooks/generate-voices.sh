@@ -4,9 +4,11 @@
 # 声主フォルダは CLAUDE_VOICE_SET で切替 (既定 ririn。announce-hook-cached.sh と共通)。
 # 使い方: ./generate-voices.sh <speakerUuid> <styleId>
 #
-# hook-lines.json の値は 2 形式:
+# hook-lines.json の値は 3 形式:
 #   "Event": "セリフ"                                   … 既定パラメータで合成
-#   "Event": {"text": "セリフ", "speed": 1.3, ...}      … セリフ単位で上書き (調教用)
+#   "Event": {"text": "セリフ", "speed": 1.3, ...}      … セリフ単位で上書き (調声用)
+#   "Event": ["セリフ", {"text": ...}, ...]             … バリエーション配列 (再生時ランダム選択)
+# 出力は <Event>-<n>.mp3 (n は配列の 1 始まり連番)。生成前に既存 mp3 を掃除する。
 # 上書きできるキー: speed / pitch / intonation / volume / styleId / prosody
 # (prosody はモーラ単位アクセントの detail JSON。prosody.sh で生成・編集する)
 # 個別の試聴・調整は tune-voice.sh で行い、決まった値をここへ書き戻すこと。
@@ -28,13 +30,21 @@ mkdir -p "$CACHE_DIR"
 BASE="$(coeiroink_resolve_base)"
 echo "COEIROINK: $BASE"
 
+# 全量再構築 (接続確認の後に掃除するので、接続失敗でキャッシュを失うことはない)
+rm -f "$CACHE_DIR"/*.mp3
+
 TMP_WAV="$(mktemp --suffix=.wav)"
 trap 'rm -f "$TMP_WAV"' EXIT
 
 jq -c --arg u "$SPEAKER_UUID" --argjson s "$STYLE_ID" --argjson sp "$SPEED" --argjson it "$INTONATION" '
   to_entries[]
-  | (.value | if type == "string" then {text: .} else . end) as $v
-  | {event: .key,
+  | .key as $k
+  | (.value
+     | if type == "array" then . else [.] end
+     | map(if type == "string" then {text: .} else . end)) as $vs
+  | range(0; $vs | length) as $i
+  | $vs[$i] as $v
+  | {event: ($k + "-" + ($i + 1 | tostring)),
      body: {speakerUuid: $u,
             styleId: ($v.styleId // $s),
             text: $v.text,

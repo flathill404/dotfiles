@@ -8,9 +8,9 @@ stow パッケージにせず自己完結させている。
 
 | ファイル | 役割 |
 |---|---|
-| `announce-hook-cached.sh` | フック本体。イベント名に対応するキャッシュ済み mp3 を再生 |
-| `hook-lines.json` | 台本。セリフと調声値 (`{text, speed, pitch, intonation, volume, styleId, prosody}`) |
-| `generate-voices.sh` | 台本を一括合成して `voices/<声主>/` に保存 |
+| `announce-hook-cached.sh` | フック本体。イベントの変種群 `<Event>-<n>.mp3` からランダムに1本再生 |
+| `hook-lines.json` | 台本。値は文字列 / オブジェクト (`{text, speed, pitch, intonation, volume, styleId, prosody}`) / それらの配列 (バリエーション、現行は各イベント5本・うち1本は短口撃) |
+| `generate-voices.sh` | 台本を一括合成して `voices/<声主>/<Event>-<n>.mp3` に保存 (生成前に旧 mp3 を掃除) |
 | `tune-voice.sh` | 一行だけ合成して試聴 (調声ループの主役) |
 | `prosody.sh` | モーラ単位アクセント (GUI のイントネーション欄相当) の取得・編集用 |
 | `f0-tune.sh` | f0 曲線の直接編集。「ざぁこ💛」の fall-rise はこれでしか出ない |
