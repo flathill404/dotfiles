@@ -41,7 +41,11 @@
       "Bash(docker compose logs*)",
       "Bash(docker compose config*)",
       "Bash(jq *)",
-      "Bash(stow *)"
+      "Bash(stow *)",
+      "Bash",
+      "Read(*)",
+      "Edit",
+      "Skill(*)"
     ],
     "deny": [
       "Bash(rm -rf*)",
@@ -421,7 +425,7 @@
       }
     }
   },
-  "outputStyle": "fowler",
+  "outputStyle": "beck",
   "effortLevel": "xhigh",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
