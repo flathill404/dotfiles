@@ -9,7 +9,7 @@ stow パッケージにせず自己完結させている。
 | ファイル | 役割 |
 |---|---|
 | `announce-hook-cached.sh` | フック本体。イベントの変種群 `<Event>-<n>.mp3` からランダムに1本再生 |
-| `hook-lines.json` | 台本。値は文字列 / オブジェクト (`{text, speed, pitch, intonation, volume, styleId, prosody}`) / それらの配列 (バリエーション、現行は各イベント5本・うち1本は短口撃) |
+| `hook-lines.json` | 台本。値は文字列 / オブジェクト (`{text, speed, pitch, intonation, volume, styleId, prosody}`) / それらの配列 (バリエーション、現行は53セット×10本=530行・全行明示調声値) |
 | `generate-voices.sh` | 台本を一括合成して `voices/<声主>/<Event>-<n>.mp3` に保存 (生成前に旧 mp3 を掃除) |
 | `tune-voice.sh` | 一行だけ合成して試聴 (調声ループの主役) |
 | `prosody.sh` | モーラ単位アクセント (GUI のイントネーション欄相当) の取得・編集用 |
@@ -22,6 +22,26 @@ stow パッケージにせず自己完結させている。
 - `~/.claude/hooks/` 内の同名ファイルはここへのシンボリックリンク (settings.json が参照)
 - `~/.claude/voices` → `voices/` のシンボリックリンク (announce が読む)
 - 声主の切替は環境変数 `CLAUDE_VOICE_SET` (既定 `ririn`)
+
+### ツール別・状況別セリフ (matcher)
+
+settings.json 側で matcher により分岐し、引数で専用セット名を渡す
+(例: `announce-hook-cached.sh PreToolUse.Bash`)。専用 mp3 が未生成なら素のイベント名にフォールバックする。
+
+| イベント | 専用セット (matcher の対象) |
+|---|---|
+| PreToolUse / PostToolUse | `.Bash` `.Edit` `.Read` `.Web` `.Agent` `.Ask` (ツール名) |
+| PostToolUseFailure / PermissionRequest | `.Bash` `.Edit` `.Web` (ツール名) |
+| SessionStart | `.resume` `.clear` `.compact` (起動方式。startup は素のセット) |
+| Notification | `.idle_prompt` (通知タイプ) |
+| StopFailure | `.rate_limit` (エラー種別) |
+
+matcher の挙動 (2026-07-14 にヘッドレス実験で確認):
+
+- 英数字と `|` のみ → ツール名の完全一致パイプリスト。それ以外の文字を含むと正規表現
+- 複数エントリが同時マッチすると**全部発火する** (二重再生)。そのため「その他」は
+  負の先読み `^(?!(Bash|…)$).*` で専用組を除外する (JS RegExp なので先読み可)
+- command のシェル文字列に書いた引数はそのまま届く
 
 ## 調声ワークフロー
 

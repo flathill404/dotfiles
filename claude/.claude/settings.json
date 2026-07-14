@@ -93,7 +93,7 @@
       }
     }
   },
-  "outputStyle": "beck",
+  "outputStyle": "fowler",
   "effortLevel": "xhigh",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
@@ -107,16 +107,37 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/randomize-output-style.sh",
+            "command": "~/.claude/hooks/announce-hook-cached.sh",
             "timeout": 10
           }
         ]
       },
       {
+        "matcher": "resume",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
+            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.resume",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.clear",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.compact",
             "timeout": 10
           }
         ]
@@ -168,6 +189,67 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Bash",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Read",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Web",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Agent",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Ask",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion)$).*",
         "hooks": [
           {
             "type": "command",
@@ -179,6 +261,37 @@
     ],
     "PermissionRequest": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Bash",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Web",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|WebSearch|WebFetch)$).*",
         "hooks": [
           {
             "type": "command",
@@ -201,6 +314,67 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Bash",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Read",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Web",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Agent",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Ask",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion)$).*",
         "hooks": [
           {
             "type": "command",
@@ -212,6 +386,37 @@
     ],
     "PostToolUseFailure": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Bash",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Web",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|WebSearch|WebFetch)$).*",
         "hooks": [
           {
             "type": "command",
@@ -234,6 +439,17 @@
     ],
     "Notification": [
       {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh Notification.idle_prompt",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!idle_prompt$).*",
         "hooks": [
           {
             "type": "command",
@@ -300,6 +516,17 @@
     ],
     "StopFailure": [
       {
+        "matcher": "rate_limit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/announce-hook-cached.sh StopFailure.rate_limit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!rate_limit$).*",
         "hooks": [
           {
             "type": "command",
