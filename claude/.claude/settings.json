@@ -107,8 +107,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SessionStart-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -117,8 +117,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.resume",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SessionStart.resume-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -127,8 +127,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.clear",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SessionStart.clear-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -137,19 +137,40 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh SessionStart.compact",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SessionStart.compact-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
     ],
     "SessionEnd": [
       {
+        "matcher": "logout",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SessionEnd.logout-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "prompt_input_exit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SessionEnd.prompt_input_exit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(clear|resume|logout|prompt_input_exit)$).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SessionEnd-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -159,8 +180,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/Setup-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -170,8 +191,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/UserPromptSubmit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -181,8 +202,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/UserPromptExpansion-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -193,8 +214,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Bash",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Bash-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -203,8 +224,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Edit",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Edit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -213,8 +234,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Read",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Read-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -223,8 +244,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Web",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Web-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -233,8 +254,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Agent",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Agent-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -243,30 +264,80 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PreToolUse.Ask",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Ask-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion)$).*",
+        "matcher": "EnterPlanMode|ExitPlanMode",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Plan-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Skill-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Workflow-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "TodoWrite|TaskCreate|TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.Todo-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse.MCP-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion|EnterPlanMode|ExitPlanMode|Skill|Workflow|TodoWrite|TaskCreate|TaskUpdate)$|mcp__).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PreToolUse-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
     ],
-    "PermissionRequest": [
+    "PermissionDenied": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Bash",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PermissionDenied.Bash-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -275,39 +346,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Edit",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PermissionDenied.Edit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "WebSearch|WebFetch",
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit)$).*",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PermissionRequest.Web",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|WebSearch|WebFetch)$).*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PermissionDenied": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PermissionDenied-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -318,8 +368,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Bash",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Bash-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -328,8 +378,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Edit",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Edit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -338,8 +388,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Read",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Read-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -348,8 +398,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Web",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Web-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -358,8 +408,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Agent",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Agent-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -368,18 +418,68 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUse.Ask",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Ask-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion)$).*",
+        "matcher": "EnterPlanMode|ExitPlanMode",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Plan-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Skill-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Workflow-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "TodoWrite|TaskCreate|TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.Todo-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse.MCP-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|Read|Glob|Grep|WebSearch|WebFetch|Task|Agent|AskUserQuestion|EnterPlanMode|ExitPlanMode|Skill|Workflow|TodoWrite|TaskCreate|TaskUpdate)$|mcp__).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUse-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -390,8 +490,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Bash",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.Bash-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -400,8 +500,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Edit",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.Edit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
@@ -410,29 +510,48 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh PostToolUseFailure.Web",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.Web-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|WebSearch|WebFetch)$).*",
+        "matcher": "Read|Glob|Grep",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.Read-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
-      }
-    ],
-    "PostToolBatch": [
+      },
       {
+        "matcher": "Task|Agent",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.Agent-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure.MCP-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Bash|Edit|Write|NotebookEdit|WebSearch|WebFetch|Read|Glob|Grep|Task|Agent)$|mcp__).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/PostToolUseFailure-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -443,40 +562,122 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh Notification.idle_prompt",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/Notification.idle_prompt-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "^(?!idle_prompt$).*",
+        "matcher": "permission_prompt",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/Notification.permission_prompt-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "agent_needs_input",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/Notification.agent_needs_input-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(idle_prompt|permission_prompt|agent_needs_input|agent_completed)$).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/Notification-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
     ],
     "SubagentStart": [
       {
+        "matcher": "Explore",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SubagentStart.Explore-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStart.Plan-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "claude-code-guide",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStart.guide-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Explore|Plan|claude-code-guide)$).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStart-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
     ],
     "SubagentStop": [
       {
+        "matcher": "Explore",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/SubagentStop.Explore-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStop.Plan-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "claude-code-guide",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStop.guide-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(Explore|Plan|claude-code-guide)$).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/SubagentStop-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -486,8 +687,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/TaskCreated-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -497,8 +698,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/TaskCompleted-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -508,8 +709,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/Stop-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -520,18 +721,68 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh StopFailure.rate_limit",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.rate_limit-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       },
       {
-        "matcher": "^(?!rate_limit$).*",
+        "matcher": "overloaded",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.overloaded-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "billing_error",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.billing_error-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "max_output_tokens",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.max_output_tokens-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "server_error",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.server_error-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "authentication_failed",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/StopFailure.authentication_failed-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "^(?!(rate_limit|overloaded|billing_error|max_output_tokens|server_error|authentication_failed)$).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "paplay ~/.claude/voices/ririn/StopFailure-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -541,19 +792,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "InstructionsLoaded": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/TeammateIdle-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -563,19 +803,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "CwdChanged": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/ConfigChange-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -586,8 +815,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/FileChanged-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -597,8 +826,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/WorktreeCreate-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -608,30 +837,30 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/WorktreeRemove-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
     ],
     "PreCompact": [
       {
+        "matcher": "manual",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreCompact.manual-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
-      }
-    ],
-    "PostCompact": [
+      },
       {
+        "matcher": "auto",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/PreCompact.auto-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -641,8 +870,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/Elicitation-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }
@@ -652,8 +881,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/announce-hook-cached.sh",
-            "timeout": 10
+            "command": "paplay ~/.claude/voices/ririn/ElicitationResult-$(shuf -i 1-10 -n 1).mp3",
+            "async": true
           }
         ]
       }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # COEIROINK 起動中に一度実行し、hook-lines.json の全セリフを一括合成して
 # ~/.claude/voices/<声主>/<イベント名>.mp3 に保存する (実体は dotfiles 管理、リンク経由)。
-# 声主フォルダは CLAUDE_VOICE_SET で切替 (既定 ririn。announce-hook-cached.sh と共通)。
+# 出力先の声主フォルダは CLAUDE_VOICE_SET で切替 (既定 ririn。再生側 settings.json は ririn 直書き)。
 # 使い方: ./generate-voices.sh <speakerUuid> <styleId>
 #
 # hook-lines.json の値は 3 形式:
